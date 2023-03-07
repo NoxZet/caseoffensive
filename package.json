@@ -1,0 +1,28 @@
+{
+  "name": "caseoffensive",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "run": "node server/main_server.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build-dev": "webpack --mode development",
+    "build": "webpack --mode production",
+    "start": "npm run build && npm run run",
+    "start-dev": "npm run build-dev && npm run run"
+  },
+  "keywords": [],
+  "author": "NoxZet",
+  "license": "none",
+  "dependencies": {
+    "@types/express": "^4.17.17",
+    "@types/react": "^18.0.28",
+    "@types/react-dom": "^18.0.11",
+    "express": "^4.18.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ts-loader": "^9.4.2",
+    "typescript": "^4.9.5",
+    "webpack": "^5.75.0",
+    "webpack-cli": "^5.0.1"
+  }
+}

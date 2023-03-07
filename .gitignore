@@ -1,0 +1,3 @@
+public/main_*.js*
+server/main_*.js*
+node_modules

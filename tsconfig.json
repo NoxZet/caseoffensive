@@ -1,13 +1,14 @@
 {
-  "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "outDir": "./public/",
-    "sourceMap": true,
-    "noImplicitAny": true,
-    "module": "es2015",
-    "target": "es5",
-    "jsx": "react",
-    "allowJs": true,
-    "moduleResolution": "node",
-  }
+    "compilerOptions": {
+        "baseUrl": "./src",
+        "allowSyntheticDefaultImports": true,
+        "outDir": "./public/",
+        "sourceMap": true,
+        "noImplicitAny": true,
+        "module": "es2015",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true,
+        "moduleResolution": "node",
+    }
 }

@@ -1,8 +1,9 @@
-const isDevelopment = process.env.NODE_ENV === 'development';
-
 import express from 'express';
 import fs from 'fs';
 import { Client } from 'pg';
+import errorHandler from 'server/errorHandler';
+
+const isDevelopment = process.env.NODE_ENV === 'development';
 
 const client = new Client({
 	'host': '127.0.0.1',
@@ -23,10 +24,18 @@ app.get('/asd', function (req: express.Request, res: express.Response, next: Fun
 });
 
 app.use((error: Error, req: express.Request, res: express.Response, next: Function) => {
-	// TODO: Error handler
-	next(error);
+	errorHandler(error);
+	if (isDevelopment) {
+		res.status(500).json({'message': error.message, 'stack': error.stack});
+	} else {
+		res.status(500).json({'message': 'Internal server error'});
+	}
 });
 
 app.listen(3000);
 
-}).catch((e) => console.log('Failed to initialize Postgres connection\n', e));
+// Catch Postgres connection error
+}).catch(e => {
+	e.message = 'Failed to initialize Postgres connection';
+	errorHandler(e);
+});

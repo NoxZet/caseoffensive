@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = (env, options) => {
   const result = [];
@@ -11,6 +12,9 @@ module.exports = (env, options) => {
         path: path.resolve(__dirname, outputDirname),
         filename: `${configFilename}.js`,
       },
+      plugins: [
+        new webpack.IgnorePlugin({ resourceRegExp: /^pg-native$/ }),
+      ],
       module: {
         rules: [
           {

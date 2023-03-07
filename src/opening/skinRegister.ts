@@ -7,6 +7,17 @@ export type Weapon = 'cz75' | 'deagle' | 'duals' | '57' | 'glock18' | 'p2000' | 
   | 'talonk' | 'navajak' | 'stilettok' | 'ursusk'
   | 'classick' | 'nomadk' | 'paracordk' | 'skeletonk' | 'survivalk'
   | 'driverg' | 'handw' | 'hydrag' | 'motog' | 'specialg' | 'sportg' | 'fangg';
+export function getWeaponDisplayName(weapon: Weapon) {
+  switch (weapon) {
+    case 'cz75': return 'CZ75-Auto';
+    case 'deagle': return 'Desert Eagle';
+    case 'duals': return 'Dual Berettas';
+    case '57': return 'Five-SeveN';
+    case 'glock18': return 'Glock-18';
+    default: return weapon;
+    //case '': return '';
+  }
+}
 export type Quality = 'covert' | 'classified' | 'restricted' | 'milspec' | 'industrial' | 'consumer' | 'contraband';
 type SkinVanilla = {
   weapon: Weapon,
@@ -19,8 +30,9 @@ type SkinWear = SkinVanilla & {
   wearMax: number,
 };
 export type Skin = SkinVanilla | SkinWear;
-export type Collection = Skin[];
-export const collections: {[collName: string]: Collection} = {};
+type Collection = 'assault' | 'dust';
+import { ContainerCollection, GloveCollection, KnifeCollection } from "opening/collectionRegister";
+export const collections: {[collName in (ContainerCollection | KnifeCollection | GloveCollection)]?: Skin[]} = {};
 
 // Aug 2013 collections - all inactive since Nov 2013
 // Except for Assault and Office also available in Operation Vanguard
@@ -4692,7 +4704,7 @@ collections.knifeHuntsmanOld = [
     "wearMax": 0.8
   }
 ];
-collections.knifeButteflyOld = [
+collections.knifeButterflyOld = [
   {
     "weapon": "butterflyk",
     "skin": "★ (Vanilla)",

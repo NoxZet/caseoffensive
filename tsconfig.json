@@ -2,6 +2,7 @@
     "compilerOptions": {
         "baseUrl": "./src",
         "allowSyntheticDefaultImports": true,
+        "strictNullChecks": true,
         "outDir": "./public/",
         "sourceMap": true,
         "noImplicitAny": true,

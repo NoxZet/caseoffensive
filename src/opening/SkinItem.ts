@@ -7,7 +7,7 @@ export default class SkinItem {
 		public quality: Quality,
 		public wear: number,
 		public level: number,
-		public exp: number,
 		public prefix: string[],
+		public stattrak: number = 0,
 	) {}
 }

@@ -30,9 +30,9 @@ type SkinWear = SkinVanilla & {
   wearMax: number,
 };
 export type Skin = SkinVanilla | SkinWear;
-import { ContainerCollection, GloveCollection, KnifeCollection } from "opening/collectionRegister";
+import { ContainerCollection, SpecialCollection } from "opening/collectionRegister";
 
-export const collections: {[collName in (ContainerCollection | KnifeCollection | GloveCollection)]: Skin[]} = {
+export const collections: {[collName in (ContainerCollection | SpecialCollection)]: Skin[]} = {
 // Aug 2013 collections - all inactive since Nov 2013
 // Except for Assault and Office also available in Operation Vanguard
 assault:  [

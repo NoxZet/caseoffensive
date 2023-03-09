@@ -1,13 +1,14 @@
 import ContainerItem from "opening/ContainerItem";
 import SkinItem from "opening/SkinItem";
-import { ContainerCollection, GloveCollection, KnifeCollection, SpecialCollection } from "opening/collectionRegister";
-import { Quality, Weapon, collections } from "opening/skinRegister";
+import { ContainerCollection, ItemCollection, SpecialCollection } from "opening/collectionRegister";
+import { Quality, Weapon, collections, Skin } from "opening/skinRegister";
+import { Prefix } from "./prefixRegister";
 
 // We determine item drop by assigning every item tickets
 // Highest rarity gets (X/number of items of that rarity)
 // Second highest gets (X*5/number of items of that rarity)
 // Covert boost moves tickets from the lowest rarity skins to the highest rarity skins
-type TicketArticle = {tickets: number, weapon: Weapon | 'special', skin: string, quality: Quality};
+type TicketArticle = {tickets: number, skin: Skin | 'specialSet', collection: ItemCollection, quality: Quality};
 
 function getCollectionTiers(collName: ContainerCollection): number {
 	let i = 0;
@@ -21,7 +22,7 @@ function getCollectionTiers(collName: ContainerCollection): number {
 	return i;
 }
 
-function generateEqualTickets(collName: ContainerCollection | KnifeCollection | GloveCollection, totalTickets: number, forceQuality?: Quality):
+function generateEqualTickets(collName: ItemCollection, totalTickets: number, forceQuality?: Quality):
 { articles: TicketArticle[], ticketSum: number } {
 	const collection = collections[collName];
 	const tickets = Math.round(totalTickets / collection.length);
@@ -29,8 +30,8 @@ function generateEqualTickets(collName: ContainerCollection | KnifeCollection | 
 	for (const currentSkin of collection) {
 		resultArticles.push({
 			tickets: tickets,
-			weapon: currentSkin.weapon,
-			skin: currentSkin.skin,
+			skin: currentSkin,
+			collection: collName,
 			quality: forceQuality ? forceQuality : currentSkin.quality,
 		});
 	}
@@ -70,8 +71,8 @@ function generateQualityTickets(collName: ContainerCollection, covertBoost: numb
 	while (currentSkin) {
 		ticketingQueue.push({
 			tickets: 0,
-			weapon: currentSkin.weapon,
-			skin: currentSkin.skin,
+			skin: currentSkin,
+			collection: collName,
 			quality: forceQuality ? forceQuality : currentSkin.quality,
 		});
 		// Advance iterator
@@ -143,8 +144,8 @@ export function createDropTickets(container: ContainerItem, expandSpecial: boole
 				else {
 					resultArticles.push({
 						tickets: specialTickets,
-						weapon: 'special',
-						skin: special,
+						skin: 'specialSet',
+						collection: special,
 						quality: forcedQuality ? forcedQuality : 'covert',
 					});
 					resultTickets += specialTickets;
@@ -155,4 +156,39 @@ export function createDropTickets(container: ContainerItem, expandSpecial: boole
 		}
 	}
 	return { ticketArticles: resultArticles, ticketSum: resultTickets };
+}
+
+function chooseArticle(ticketArticles: TicketArticle[], ticketSum: number): TicketArticle {
+	const ticket = Math.floor(Math.random() * ticketSum);
+	let cum = 0;
+	for (const article of ticketArticles) {
+		cum += article.tickets;
+		if (ticket <= cum) {
+			return article;
+		}
+	}
+	throw new Error('Cumulative sum was lower than randomly generated ticket');
+}
+
+function getRandomPrefix(container: ContainerItem): Prefix[] {
+	// TODO: stattrak should be randomized
+	return container.prefix.slice();
+}
+
+export function getDrops(container: ContainerItem, count: number): SkinItem[] {
+	const { ticketArticles: ticketArticles, ticketSum: ticketSum } = createDropTickets(container, true);
+	const results = [];
+	for (let i = 0; i < count; i++) {
+		const article = chooseArticle(ticketArticles, ticketSum);
+		const skin = article.skin;
+		if (skin === 'specialSet') {
+			throw new Error('Generated a skin with specialSet for getDrops');
+		} else {
+			const wear = ('wearMin' in skin)
+				? Math.random() * (skin.wearMax - skin.wearMin) + skin.wearMin
+				: 0;
+			results.push(new SkinItem(skin.weapon, skin.skin, article.quality, wear, container.level, getRandomPrefix(container)));
+		}
+	}
+	return results;
 }

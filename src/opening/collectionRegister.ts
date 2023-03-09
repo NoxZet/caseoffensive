@@ -58,3 +58,4 @@ export type Collection = 'assault' | 'aztec' | 'aztec' | 'dust' | 'inferno' | 'm
 	| 'chopShop' | 'godsMonsters' | 'risingSun' | 'canals' | 'norse' | 'havoc'
 	| 'howl';
 export type ContainerCollection = Case | Collection;
+export type ItemCollection = ContainerCollection | SpecialCollection;

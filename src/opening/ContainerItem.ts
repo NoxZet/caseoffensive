@@ -1,15 +1,16 @@
-import { KnifeCollection, GloveCollection, Case, Collection } from 'opening/collectionRegister'
+import { ContainerCollection, SpecialCollection } from 'opening/collectionRegister'
+import { Prefix } from './prefixRegister';
 
 export default class ContainerItem {
 	constructor(
-		public mainCollection: Case | Collection,
-		public mainSpecial: KnifeCollection | GloveCollection | undefined,
+		public mainCollection: ContainerCollection,
+		public mainSpecial: SpecialCollection | undefined,
 		public level: number = 1,
 		public exp: number = 0,
-		public prefix: string[] = [],
+		public prefix: Prefix[] = [],
 		// Imported contraband collection
-		public sideCollection?: Case | Collection,
-		public sideSpecial?: KnifeCollection | GloveCollection | undefined,
+		public sideCollection?: ContainerCollection,
+		public sideSpecial?: SpecialCollection | undefined,
 		public sideChance: number = 0,
 		// Increases chance of the rarest guns, both regular and contraband
 		public covertBoost: number = 0,

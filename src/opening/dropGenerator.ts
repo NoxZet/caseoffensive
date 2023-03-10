@@ -1,8 +1,8 @@
 import ContainerItem from "opening/ContainerItem";
 import SkinItem from "opening/SkinItem";
 import { ContainerCollection, ItemCollection, SpecialCollection } from "opening/collectionRegister";
-import { Quality, Weapon, collections, Skin } from "opening/skinRegister";
-import { Prefix } from "./prefixRegister";
+import { Quality, collections, Skin } from "opening/skinRegister";
+import { Prefix, prefixChance, PrefixData } from "./prefixRegister";
 
 // We determine item drop by assigning every item tickets
 // Highest rarity gets (X/number of items of that rarity)
@@ -123,7 +123,7 @@ export function createDropTickets(container: ContainerItem, expandSpecial: boole
 	let allowedTickets: number | undefined = undefined;
 	const containerData: { coll: ContainerCollection | undefined, special: SpecialCollection | undefined, forcedQuality: Quality | undefined }[] = [
 		{ coll: container.mainCollection, special: container.mainSpecial, forcedQuality: undefined },
-		{ coll: container.sideCollection, special: container.sideSpecial, forcedQuality: 'contraband' },
+		{ coll: container.sideCollection, special: container.sideSpecial, forcedQuality: undefined },//'contraband' },
 	];
 	for (const { coll: coll, special: special, forcedQuality: forcedQuality } of containerData) {
 		if (coll) {
@@ -167,12 +167,40 @@ function chooseArticle(ticketArticles: TicketArticle[], ticketSum: number): Tick
 			return article;
 		}
 	}
-	throw new Error('Cumulative sum was lower than randomly generated ticket');
+	throw new Error('Cumulative sum was lower than randomly generated ticket for '
+		+ ticketArticles[0].collection + ' - ' + ticketArticles[ticketArticles.length - 1].collection);
+}
+
+function getSingleRandomPrefix(key: Prefix, prefixData: PrefixData): Prefix | null {
+	if (prefixData === false) {
+		return null;
+	} else if (prefixData === true) {
+		return key;
+	} else if (typeof prefixData === 'number') {
+		return Math.random() * prefixData < 1 ? key : null;
+	} else {
+		const ticket = Math.floor(Math.random() * prefixData.ticketSum);
+		// Cumulate ticket counts until we find cumulative count under which ticket fits
+		let cum = 0;
+		for (const { tickets: tickets, prefix: prefix } of prefixData.outcomes) {
+			cum += tickets;
+			if (ticket < cum) {
+				return prefix;
+			}
+		}
+		throw new Error('Cumulative sum was lower than ticket for prefix ' + key);
+	}
 }
 
 function getRandomPrefix(container: ContainerItem): Prefix[] {
-	// TODO: stattrak should be randomized
-	return container.prefix.slice();
+	const prefixes: Prefix[] = [];
+	for (const prefixName of container.prefix) {
+		const prefix = getSingleRandomPrefix(prefixName, prefixChance[prefixName]);
+		if (prefix) {
+			prefixes.push(prefix);
+		}
+	}
+	return prefixes;
 }
 
 export function getDrops(container: ContainerItem, count: number): SkinItem[] {

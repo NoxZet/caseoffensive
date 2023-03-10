@@ -1,5 +1,5 @@
-import ContainerItem from "opening/ContainerItem";
-import SkinItem from "opening/SkinItem";
+import ContainerItem from "database/ContainerItem";
+import SkinItem from "database/SkinItem";
 import { ContainerCollection, ItemCollection, SpecialCollection } from "opening/collectionRegister";
 import { Quality, collections, Skin } from "opening/skinRegister";
 import { Prefix, prefixChance, PrefixData } from "./prefixRegister";
@@ -214,7 +214,7 @@ export function getDrops(container: ContainerItem, count: number): SkinItem[] {
 		} else {
 			const wear = ('wearMin' in skin)
 				? Math.random() * (skin.wearMax - skin.wearMin) + skin.wearMin
-				: 0;
+				: null;
 			results.push(new SkinItem(skin.weapon, skin.skin, article.quality, wear, container.level, getRandomPrefix(container)));
 		}
 	}

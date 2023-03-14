@@ -7,12 +7,18 @@
  * - injectConstructor: If true, set this attribute through object constructor - the order of columns
  *   with injectConstructor = true in column property must be the same as these properties in constructor.
  */
-export type DbColumn = { name: string, type: string, foreignKey?: string, primaryKey?: true, nullable?: true, injectCostructor?: true };
+export type DbColumn =
+{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true }
+|
+{ name: string, primaryKey: true, injectConstructor?: true };
+
+export type DbModel = { new (...args: any[]): BaseModel, tableName: string, columns: DbColumn[] }
 
 export default class BaseModel {
 	static columns: DbColumn[] = [
 		{ name: 'id', type: 'INT', primaryKey: true },
 	];
 
-	public id: number;
+	/** Set only by the DbInterface and shouldn't be modified manually */
+	readonly id?: number = undefined;
 }

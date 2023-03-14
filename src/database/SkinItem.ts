@@ -3,7 +3,7 @@ import { DbColumn } from './BaseModel';
 import BaseItem from './BaseItem';
 
 export default class SkinItem extends BaseItem {
-	static tableName = 'container_item';
+	static tableName = 'skin_item';
 	static columns: DbColumn[] = BaseItem.columns.concat([
 		{ name: 'weapon', type: 'TEXT', injectCostructor: true },
 		{ name: 'skin', type: 'TEXT', injectCostructor: true },

@@ -6,6 +6,10 @@
         "outDir": "./public/",
         "sourceMap": true,
         "noImplicitAny": true,
+        "lib": [
+            "dom",
+            "ES2021.String"
+        ],
         "module": "es2015",
         "target": "es5",
         "jsx": "react",

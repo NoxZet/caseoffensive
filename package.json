@@ -4,11 +4,12 @@
   "description": "",
   "scripts": {
     "run": "node server/main_server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "run-dev": "node --enable-source-maps server/main_server.js",
     "build-dev": "webpack --mode development",
     "build": "webpack --mode production",
     "start": "npm run build && npm run run",
-    "start-dev": "npm run build-dev && npm run run"
+    "start-dev": "npm run build-dev && npm run run-dev",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "NoxZet",

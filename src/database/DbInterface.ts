@@ -98,4 +98,37 @@ export default class DbInterface {
 		}
 		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
+
+	selectModel(OneClass: DbModel, conditions: string = '', parameters: any[] = []): Promise<BaseModel[]> {
+		const columns = [];
+		// Build a list of columns to select and a query string
+		for (const column of OneClass.columns) {
+			columns.push(this.getDbColumnName(column.name));
+		}
+		const query = `SELECT ${columns.join(', ')} FROM ${OneClass.tableName} ${conditions}`;
+		return new Promise((resolve, reject) => {
+			this.client.query(query, parameters).then(returned => {
+				const models = [];
+				// Bind each row onto a model object
+				for (const row of returned.rows) {
+					const constructorParams = [];
+					// injectCostructor columns are pushed onto array to be passed into constructor
+					for (const column of OneClass.columns) {
+						if ('injectConstructor' in column) {
+							constructorParams.push(row[this.getDbColumnName(column.name)]);
+						}
+					}
+					const model = new OneClass(...constructorParams);
+					// The rest is assigned after construction
+					for (const column of OneClass.columns) {
+						if (!('injectConstructor' in column)) {
+							(model as any)[column.name] = row[this.getDbColumnName(column.name)];
+						}
+					}
+					models.push(model);
+				}
+				resolve(models);
+			}).catch(error => reject(error));
+		});
+	}
 }

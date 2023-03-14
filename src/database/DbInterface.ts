@@ -58,21 +58,24 @@ export default class DbInterface {
 			if (model instanceof OneClass) {
 				let queryColumnNames: string[] = [];
 				let queryColumnValues: string[] = [];
-				let values: any[] = [];
+				let parameters: any[] = [];
 				let updateRows: string[] = [];
 				let i = 0;
 				let primaryKey: DbColumn | undefined = undefined;
 				// Compose strings from column metadata - column names, $<int>, values
 				for (const column of OneClass.columns) {
-					i++;
-					values.push((model as any)[column.name]);
+					// If model[primaryKey] is not set, don't set it in query so it can autogenerate
+					if (!('primaryKey' in column) || (model as any)[column.name]) {
+						i++;
+						queryColumnNames.push(this.getDbColumnName(column.name));
+						queryColumnValues.push(`$${i}`);
+						parameters.push((model as any)[column.name]);
+					}
 					if ('primaryKey' in column) {
 						primaryKey = column;
 					} else {
+						// The block with i++ will always happen if this block happens
 						updateRows.push(`${this.getDbColumnName(column.name)} = $${i}`);
-					}
-					if (!('primaryKey' in column) || model.id) {
-
 					}
 				}
 				// Create query string using the column strings INSERT INTO <tableName> (column1, ...) VALUES ($1, ...)
@@ -84,7 +87,7 @@ export default class DbInterface {
 					query += `\nRETURNING ${primaryKey.name}`
 				}
 				return new Promise((resolve, reject) => {
-					this.client.query(query, values).then(returned => {
+					this.client.query(query, parameters).then(returned => {
 						if (primaryKey) {
 							(model as any)[primaryKey.name] = returned.rows[0].id;
 						}

@@ -32,6 +32,8 @@ export default class DbInterface {
 						let row = `${this.getDbColumnName(column.name)} ${column.type}`
 						if (!column.nullable)
 							row += ` NOT NULL`;
+						if (column.unique)
+							row += ` UNIQUE`;
 						if (column.foreignKey)
 							row += ` REFERENCES ${column.foreignKey}`;
 						queryColumns.push(row);

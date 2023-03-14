@@ -4,8 +4,8 @@ import BaseModel from "./BaseModel";
 export default class User extends BaseModel {
 	static tableName = 'users';
 	static columns: DbColumn[] = BaseModel.columns.concat([
-		{ name: 'username', type: 'TEXT', injectCostructor: true },
-		{ name: 'email', type: 'TEXT', injectCostructor: true },
+		{ name: 'username', type: 'TEXT', injectCostructor: true, unique: true },
+		{ name: 'email', type: 'TEXT', injectCostructor: true, unique: true },
 		{ name: 'password', type: 'TEXT', injectCostructor: true },
 	]);
 

@@ -8,7 +8,7 @@
  *   with injectConstructor = true in column property must be the same as these properties in constructor.
  */
 export type DbColumn =
-{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true }
+{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true, unique?: true }
 |
 { name: string, primaryKey: true, injectConstructor?: true };
 

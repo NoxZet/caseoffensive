@@ -1,27 +1,38 @@
 import express from 'express';
-import fs from 'fs';
 import { Client } from 'pg';
 import errorHandler from 'server/errorHandler';
+import DbInterface from 'database/DbInterface';
+import User from 'database/User';
+import ContainerItem from 'database/ContainerItem';
+import SkinItem from 'database/SkinItem';
+import addUserRoutes from 'routes/userRoutes';
+
+//const container = new ContainerItem('caseChroma', 'knife1Chroma', 1, 0, ['souvenir', 'stattrak', 'festive'], 'godsMonsters', 'knifeFalchionOld', 0.3, 12, 9);
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
-const client = new Client({
+const pgClient = new Client({
 	'host': '127.0.0.1',
 	'port': 5432,
 	'database': 'postgres',
 	'user': 'postgres',
 	'password': 'postgres',
+	'connectionTimeoutMillis': 30 * 1000,
 })
-client.connect()
+pgClient.connect()
 .then(() => {
+
+console.log('CONNECTED');
+
+const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem]);
 
 const app = express();
 
 app.use(express.static('public'));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-app.get('/asd', function (req: express.Request, res: express.Response, next: Function) {
-	
-});
+addUserRoutes(app, dbInterface);
 
 app.use((error: Error, req: express.Request, res: express.Response, next: Function) => {
 	errorHandler(error);

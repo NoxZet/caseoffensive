@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { BaseModelId } from 'database/BaseModel';
 import DbInterface from 'database/DbInterface';
 import User from 'database/User';
+
 const SALT_ROUNDS = 10;
 const SESSION_BYTES = 64;
 
@@ -61,11 +62,8 @@ export default class Security {
 		if (users.length < 1) {
 			throw new InvalidCredentials();
 		} else {
-			return new Promise<User & BaseModelId>((resolve, reject) => {
-				this.verifyPassword(ptPassword, users[0].password)
-					.then(_ => resolve(users[0]))
-					.catch(reject);
-			});
+			await this.verifyPassword(ptPassword, users[0].password);
+			return users[0];
 		}
 	}
 

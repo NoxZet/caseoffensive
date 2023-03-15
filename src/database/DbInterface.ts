@@ -1,7 +1,7 @@
 import { Client } from "pg";
-import BaseModel, { DbColumn, DbModel } from "./BaseModel";
+import BaseModel, { BaseModelId, DbColumn, DbModel } from "./BaseModel";
 
-export type DbExtraColumn = { name: string, expression: string }
+export class MissingId extends Error {}
 
 export default class DbInterface {
 	/**
@@ -10,7 +10,7 @@ export default class DbInterface {
 	 */
 	constructor (
 		public client: Client,
-		public classes: DbModel[]
+		public classes: DbModel<BaseModel>[]
 	) {}
 
 	getDbColumnName(name: string): string {
@@ -103,7 +103,7 @@ export default class DbInterface {
 		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
 
-	selectModel(OneClass: DbModel, conditions: string = '', parameters: any[] = []): Promise<BaseModel[]> {
+	selectModel<Model extends BaseModel>(OneClass: DbModel<Model>, conditions: string = '', parameters: any[] = []): Promise<(Model & BaseModelId)[]> {
 		const columns = [];
 		// Build a list of columns to select and a query string
 		for (const column of OneClass.columns) {
@@ -129,7 +129,11 @@ export default class DbInterface {
 							(model as any)[column.name] = row[this.getDbColumnName(column.name)];
 						}
 					}
-					models.push(model);
+					// Every BaseModel should have an id assigned when retrived from database
+					if (typeof model.id !== 'number') {
+						throw new MissingId(OneClass.name);
+					}
+					models.push((model as Model & BaseModelId));
 				}
 				resolve(models);
 			}).catch(error => reject(error));

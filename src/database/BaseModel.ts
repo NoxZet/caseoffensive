@@ -12,7 +12,9 @@ export type DbColumn =
 |
 { name: string, primaryKey: true, injectConstructor?: true };
 
-export type DbModel = { new (...args: any[]): BaseModel, tableName: string, columns: DbColumn[] }
+export type DbModel<Model extends BaseModel> = { new (...args: any[]): Model, tableName: string, columns: DbColumn[] }
+
+export type BaseModelId = {readonly id: number};
 
 export default class BaseModel {
 	static columns: DbColumn[] = [

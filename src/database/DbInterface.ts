@@ -1,6 +1,8 @@
 import { Client } from "pg";
 import BaseModel, { DbColumn, DbModel } from "./BaseModel";
 
+export type DbExtraColumn = { name: string, expression: string }
+
 export default class DbInterface {
 	/**
 	 * @param client Pg client
@@ -134,3 +136,5 @@ export default class DbInterface {
 		});
 	}
 }
+
+let db

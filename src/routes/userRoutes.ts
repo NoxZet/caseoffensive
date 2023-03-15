@@ -1,8 +1,9 @@
 import express from 'express';
 import DbInterface from 'database/DbInterface';
+import Security from 'server/Security';
 import User from 'database/User';
 
-export default function addRoutes(app: express.Express, dbInterface: DbInterface) {
+export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security) {
 
 app.post('/user', async function (req: express.Request, res: express.Response, next: Function) {
 	const username = req.body.username;
@@ -27,7 +28,8 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 		return;
 	}
 	try {
-		const user = new User(username, email, password);
+		const hash = await security.hashPassword(password);
+		const user = new User(username, email, hash);
 		await dbInterface.insertModel(user);
 		res.status(200).json({
 			'message': 'Account successfully created',

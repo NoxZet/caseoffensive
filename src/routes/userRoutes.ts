@@ -68,7 +68,6 @@ app.post('/session', async function (req: express.Request, res: express.Response
 			'token': token,
 		});
 	} catch (error) {
-		console.log(error.name, error);
 		if (error instanceof InvalidCredentials) {
 			res.status(422).json({
 				'message': 'Username or password is invalid',

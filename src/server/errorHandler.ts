@@ -1,3 +1,3 @@
 export default function errorHandler(e: Error) {
-	console.log(`${e.message}\n'${e.stack}`);
+	console.log(`${e.name}: ${e.message}\n'${e.stack}`);
 }

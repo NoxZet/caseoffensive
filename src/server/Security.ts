@@ -78,6 +78,10 @@ export default class Security {
 		return token;
 	}
 
+	deleteSession(token: string): void {
+		delete this.sessions[token];
+	}
+
 	async getUser(token: string): Promise<User & BaseModelId> {
 		if (!this.sessions[token]) {
 			throw new InvalidToken();

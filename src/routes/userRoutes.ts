@@ -78,4 +78,20 @@ app.post('/session', async function (req: express.Request, res: express.Response
 	}
 });
 
+// Log out: Destroy session for the given token
+// No feedback is provided about whether the token actually existed or not
+app.delete('/session', async function (req: express.Request, res: express.Response, next: Function) {
+	const token = req.body.token;
+	if (typeof token !== 'string') {
+		res.status(400).json({
+			'message': 'Invalid request body',
+		});
+		return;
+	}
+	security.deleteSession(token);
+	res.status(200).json({
+		'message': 'Ok',
+	});
+});
+
 }

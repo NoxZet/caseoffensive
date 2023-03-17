@@ -28,7 +28,7 @@ module.exports = (env, options) => {
         extensions: ['.tsx', '.ts', '.js'],
         modules: ['node_modules', path.resolve(__dirname, 'src')],
       },
-      devtool: options.mode === 'development' ? 'cheap-source-map' : false
+      devtool: options.mode === 'development' ? 'source-map' : false
     });
   }
   return result;

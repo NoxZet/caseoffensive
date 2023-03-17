@@ -52,4 +52,31 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 	}
 });
 
+// Log in (create session)
+app.post('/session', async function (req: express.Request, res: express.Response, next: Function) {
+	const username = req.body.username;
+	const password = req.body.password;
+	if (typeof username !== 'string' || typeof password !== 'string') {
+		res.status(400).json({
+			'message': 'Invalid request body',
+		});
+		return;
+	}
+	try {
+		const token = await security.createSession(username, password);
+		res.status(200).json({
+			'token': token,
+		});
+	} catch (error) {
+		console.log(error.name, error);
+		if (error instanceof InvalidCredentials) {
+			res.status(422).json({
+				'message': 'Username or password is invalid',
+			});
+		} else {
+			next(error);
+		}
+	}
+});
+
 }

@@ -14,6 +14,7 @@ export type DbColumn =
 
 export type DbModel<Model extends BaseModel> = { new (...args: any[]): Model, tableName: string, columns: DbColumn[] }
 
+/** Helper type to specify that id is set */
 export type BaseModelId = {readonly id: number};
 
 export default class BaseModel {

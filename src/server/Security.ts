@@ -1,3 +1,4 @@
+import express from 'express';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
 import { BaseModelId } from 'database/BaseModel';
@@ -11,11 +12,16 @@ export class InvalidCredentials extends Error {}
 export class InvalidToken extends Error {}
 
 export default class Security {
+	/** Pass as middleware to get error if user is not authenticated or User object in res.locals.user if they are */
+	public readonly getUserMiddleware: (req: express.Request, res: express.Response, next: Function) => void;
 	private sessions: {[key: string]: {userId: number, lastAccess: Date}} = {};
 
 	constructor(
 		private dbInterface: DbInterface
-	) {}
+	) {
+		this.getUserMiddleware =
+			(req: express.Request, res: express.Response, next: Function) => this.getUserMiddlewareMethod(req, res, next);
+	}
 
 	/**
 	 * Abstraction of bcrypt.hash with constant salt rounds
@@ -87,12 +93,29 @@ export default class Security {
 			throw new InvalidToken();
 		}
 		const users = await this.dbInterface.selectModel(User, 'WHERE id = $1', [this.sessions[token].userId]);
-		// User has disappeared, we shouldn't delete users (error will probably fall through to 500)
+		// User has disappeared
 		if (users.length < 1) {
 			delete this.sessions[token];
 			throw new InvalidToken();
 		} else {
 			return users[0];
 		}
+	}
+
+	private getUserMiddlewareMethod(req: express.Request, res: express.Response, next: Function) {
+		this.getUser(req.headers.authorization || '')
+		.then(user => {
+			res.locals.user = user;
+			next();
+		})
+		.catch(error => {
+			if (error instanceof InvalidToken) {
+				res.status(401).send({
+					'message': 'Invalid authorization token',
+				})
+			} else {
+				next(error);
+			}
+		});
 	}
 }

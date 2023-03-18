@@ -9,6 +9,7 @@ import User from 'database/User';
 import ContainerItem from 'database/ContainerItem';
 import SkinItem from 'database/SkinItem';
 import addUserRoutes from 'routes/userRoutes';
+import addInventoryRoutes from 'routes/inventoryRoutes';
 
 //const container = new ContainerItem('caseChroma', 'knife1Chroma', 1, 0, ['souvenir', 'stattrak', 'festive'], 'godsMonsters', 'knifeFalchionOld', 0.3, 12, 9);
 
@@ -37,6 +38,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 addUserRoutes(app, dbInterface, security);
+addInventoryRoutes(app, dbInterface, security);
 
 app.use((error: Error, req: express.Request, res: express.Response, next: Function) => {
 	errorHandler(error);

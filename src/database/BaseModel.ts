@@ -1,3 +1,7 @@
+export type DbColumnPrimary =
+{ name: string, primaryKey: true, injectConstructor?: true };
+export type DbColumnNonPrimary =
+{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true, unique?: true };
 /**
  * - name: Name of the property to set. Database column name is generated from snake_case of this name.
  * - type: Postgres column type
@@ -7,10 +11,7 @@
  * - injectConstructor: If true, set this attribute through object constructor - the order of columns
  *   with injectConstructor = true in column property must be the same as these properties in constructor.
  */
-export type DbColumn =
-{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true, unique?: true }
-|
-{ name: string, primaryKey: true, injectConstructor?: true };
+export type DbColumn = DbColumnPrimary | DbColumnNonPrimary;
 
 export type DbModel<Model extends BaseModel> = { new (...args: any[]): Model, tableName: string, columns: DbColumn[] }
 

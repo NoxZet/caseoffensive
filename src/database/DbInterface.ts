@@ -1,7 +1,9 @@
 import { Client } from "pg";
-import BaseModel, { BaseModelId, DbColumn, DbModel } from "./BaseModel";
+import BaseModel, { BaseModelId, DbColumn, DbColumnNonPrimary, DbModel } from "./BaseModel";
 
 export class MissingId extends Error {}
+export class CannotCreateNewPrimaryKey extends Error {}
+export class CannotRemoveColumn extends Error {}
 
 export default class DbInterface {
 	/**
@@ -19,10 +21,27 @@ export default class DbInterface {
 			.replaceAll(/([A-Z])/g, letter => '_'+letter.toLowerCase());
 	}
 
-	createTables(): Promise<true> {
+	private getColumnDefinition(column: DbColumnNonPrimary): string {
+		let row = `${this.getDbColumnName(column.name)} ${column.type}`
+		if (!column.nullable)
+			row += ` NOT NULL`;
+		if (column.unique)
+			row += ` UNIQUE`;
+		if (column.foreignKey)
+			row += ` REFERENCES ${column.foreignKey}`;
+		return row;
+	}
+
+	private createTables(): Promise<true> {
 		return new Promise(async (resolve, reject) => {
 			let classesLeft = this.classes.length;
-			let failed = false;
+			function resolveOneClass() {
+				classesLeft--;
+				if (classesLeft === 0) {
+					resolve(true);
+					console.log('create resolved');
+				}
+			}
 			for (const OneClass of this.classes) {
 				let primaryKeys = 0;
 				let queryColumns = [];
@@ -31,30 +50,93 @@ export default class DbInterface {
 						primaryKeys++;
 						queryColumns.push(`${this.getDbColumnName(column.name)} SERIAL PRIMARY KEY`);
 					} else {
-						let row = `${this.getDbColumnName(column.name)} ${column.type}`
-						if (!column.nullable)
-							row += ` NOT NULL`;
-						if (column.unique)
-							row += ` UNIQUE`;
-						if (column.foreignKey)
-							row += ` REFERENCES ${column.foreignKey}`;
-						queryColumns.push(row);
+						queryColumns.push(this.getColumnDefinition(column));
 					}
 				}
 				let query = `CREATE TABLE IF NOT EXISTS ${OneClass.tableName}(\n` + queryColumns.join(`,\n`) + `\n)`;
 				this.client.query(query).then(result => {
-					classesLeft--;
-					if (classesLeft === 0) {
-						resolve(true);
-					}
+					resolveOneClass();
 				}).catch(error => {
-					if (!failed) {
-						failed = true;
-						reject(error);
+					reject(error);
+				});
+			}
+		});
+	}
+
+	private updateColumns(): Promise<true> {
+		return new Promise(async (resolve, reject) => {
+			let classesLeft = this.classes.length;
+			function resolveOneClass() {
+				classesLeft--;
+				if (classesLeft === 0) {
+					resolve(true);
+					console.log('update resolved');
+				}
+			}
+			for (const OneClass of this.classes) {
+				// Find all columns for the table already in database
+				let fetchQuery = `SELECT * FROM information_schema.columns WHERE table_name = '${OneClass.tableName}' ORDER BY ordinal_position`;
+				this.client.query(fetchQuery).then(result => {
+					// Check if any columns disappeared (are in db but not on class column definition)
+					const removedColumns: string[] = [];
+					for (const actualColumn of result.rows) {
+						let present = false;
+						for (const column of OneClass.columns) {
+							if (actualColumn.column_name === this.getDbColumnName(column.name)) {
+								present = true;
+								break;
+							}
+						}
+						if (!present) {
+							removedColumns.push(actualColumn.column_name);
+						}
+					}
+					if (removedColumns.length >= 1) {
+						reject(new CannotRemoveColumn(`${OneClass.tableName}.(${removedColumns.join(', ')})`));
+						return;
+					}
+					// Check for new columns (are on class definition but not in db)
+					const addColumns: DbColumnNonPrimary[] = [];
+					for (const column of OneClass.columns) {
+						// Check if one of the fetched columns is this one
+						let present = false;
+						for (const actualColumn of result.rows) {
+							if (actualColumn.column_name === this.getDbColumnName(column.name)) {
+								present = true;
+								break;
+							}
+						}
+						if (!present) {
+							if ('primaryKey' in column) {
+								reject(new CannotCreateNewPrimaryKey(`${OneClass.tableName}.${column.name}`));
+							} else {
+								addColumns.push(column);
+							}
+						}
+					}
+					// Add missing columns if any
+					if (addColumns.length >= 1) {
+						const addColumnQuery: string[] = [];
+						for (const newColumn of addColumns) {
+							addColumnQuery.push(`ADD COLUMN ` + this.getColumnDefinition(newColumn));
+						}
+						let alterQuery = `ALTER TABLE ${OneClass.tableName}\n` + addColumnQuery.join(',\n');
+						console.log(alterQuery);
+						this.client.query(alterQuery).then(_ => {
+							resolveOneClass();
+						})
+					} else {
+						resolveOneClass();
 					}
 				});
 			}
 		});
+	}
+
+	updateDatabase(): Promise<true> {
+		return this.createTables()
+			.then(() => this.updateColumns())
+			.then(() => true);
 	}
 
 	insertModel(model: BaseModel): Promise<true> {

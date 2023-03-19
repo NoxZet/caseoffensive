@@ -24,11 +24,20 @@ const pgClient = new Client({
 	'connectionTimeoutMillis': 30 * 1000,
 })
 pgClient.connect()
-.then(() => {
+.then(async () => {
+	const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem]);
+	try {
+		await dbInterface.updateDatabase();
+		return dbInterface;
+	} catch (error) {
+		errorHandler(error);
+		process.exit();
+	}
+})
+.then((dbInterface) => {
 
 console.log('CONNECTED');
 
-const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem]);
 const security = new Security(dbInterface);
 
 const app = express();

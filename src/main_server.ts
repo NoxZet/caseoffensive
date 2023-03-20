@@ -8,6 +8,10 @@ import Security from 'server/Security';
 import User from 'database/User';
 import ContainerItem from 'database/ContainerItem';
 import SkinItem from 'database/SkinItem';
+import Quest from 'database/Quest';
+import QuestSchedule from 'database/QuestSchedule';
+import QuestUser from 'database/QuestUser';
+
 import addUserRoutes from 'routes/userRoutes';
 import addInventoryRoutes from 'routes/inventoryRoutes';
 
@@ -25,7 +29,7 @@ const pgClient = new Client({
 })
 pgClient.connect()
 .then(async () => {
-	const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem]);
+	const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem, Quest, QuestSchedule, QuestUser]);
 	try {
 		await dbInterface.updateDatabase();
 		return dbInterface;

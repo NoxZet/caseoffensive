@@ -20,12 +20,12 @@ export default class ContainerItem extends BaseItem {
 
 	constructor(
 		public mainCollection: ContainerCollection,
-		public mainSpecial: SpecialCollection | undefined,
+		public mainSpecial?: SpecialCollection | undefined,
 		public level: number = 1,
 		public exp: number = 0,
 		public prefix: Prefix[] = [],
 		// Imported contraband collection
-		public sideCollection?: ContainerCollection,
+		public sideCollection?: ContainerCollection | undefined,
 		public sideSpecial?: SpecialCollection | undefined,
 		public sideChance: number = 0,
 		// Increases chance of the rarest guns, both regular and contraband

@@ -2,6 +2,7 @@ import { Client } from "pg";
 import BaseModel, { BaseModelId, DbColumn, DbColumnNonPrimary, DbModel } from "./BaseModel";
 
 export class MissingId extends Error {}
+export class NoResult extends Error {}
 export class CannotCreateNewPrimaryKey extends Error {}
 export class CannotRemoveColumn extends Error {}
 
@@ -39,7 +40,6 @@ export default class DbInterface {
 				classesLeft--;
 				if (classesLeft === 0) {
 					resolve(true);
-					console.log('create resolved');
 				}
 			}
 			for (const OneClass of this.classes) {
@@ -70,7 +70,6 @@ export default class DbInterface {
 				classesLeft--;
 				if (classesLeft === 0) {
 					resolve(true);
-					console.log('update resolved');
 				}
 			}
 			for (const OneClass of this.classes) {
@@ -121,7 +120,6 @@ export default class DbInterface {
 							addColumnQuery.push(`ADD COLUMN ` + this.getColumnDefinition(newColumn));
 						}
 						let alterQuery = `ALTER TABLE ${OneClass.tableName}\n` + addColumnQuery.join(',\n');
-						console.log(alterQuery);
 						this.client.query(alterQuery).then(_ => {
 							resolveOneClass();
 						})
@@ -137,6 +135,20 @@ export default class DbInterface {
 		return this.createTables()
 			.then(() => this.updateColumns())
 			.then(() => true);
+	}
+
+	deleteModel(model: BaseModel & BaseModelId): Promise<true> {
+		for (const OneClass of this.classes) {
+			if (model instanceof OneClass) {
+				let query = `DELETE FROM ${OneClass.tableName} WHERE id = $1`;
+				return new Promise((resolve, reject) => {
+					this.client.query(query, [model.id])
+					.then(returned => resolve(true))
+					.catch(error => reject(error));
+				});
+			}
+		}
+		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
 
 	insertModel(model: BaseModel): Promise<true> {
@@ -220,6 +232,38 @@ export default class DbInterface {
 				resolve(models);
 			}).catch(error => reject(error));
 		});
+	}
+
+	/**
+	 * @param OneClass Model class to fetch for
+	 * @param id
+	 * @returns Promise that resolves to a model with the id or null
+	 */
+	selectModelByIdOrNull<Model extends BaseModel>(OneClass: DbModel<Model>, id: number): Promise<(Model & BaseModelId) | null> {
+		return this.selectModel(OneClass, 'WHERE id = $1', [id])
+		.then((models) => {
+			if (models.length === 0) {
+				return null;
+			} else {
+				return models[0];
+			}
+		});
+	}
+
+	/**
+	 * @param OneClass Model class to fetch for
+	 * @param id
+	 * @returns Promise that resolves to a model with the id or rejects with {@link NoResult}
+	 */
+	selectModelById<Model extends BaseModel>(OneClass: DbModel<Model>, id: number): Promise<Model & BaseModelId> {
+		return this.selectModelByIdOrNull(OneClass, id)
+		.then((model) => {
+			if (model === null) {
+				throw new NoResult();
+			} else {
+				return model;
+			}
+		})
 	}
 }
 

@@ -19,6 +19,7 @@ import addInventoryRoutes from 'routes/inventoryRoutes';
 
 const isDevelopment = process.env.NODE_ENV === 'development';
 
+// TODO: Change architecture to using Pool so we can do transactions
 const pgClient = new Client({
 	'host': '127.0.0.1',
 	'port': 5432,

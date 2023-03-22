@@ -4,6 +4,7 @@ import errorHandler from 'server/errorHandler';
 
 import DbInterface from 'database/DbInterface';
 import Security from 'server/Security';
+import Questing from 'questing/Questing';
 
 import User from 'database/User';
 import ContainerItem from 'database/ContainerItem';
@@ -13,6 +14,7 @@ import QuestUser from 'database/QuestUser';
 
 import addUserRoutes from 'routes/userRoutes';
 import addInventoryRoutes from 'routes/inventoryRoutes';
+import addQuestRoutes from 'routes/questRoutes';
 
 //const container = new ContainerItem('caseChroma', 'knife1Chroma', 1, 0, ['souvenir', 'stattrak', 'festive'], 'godsMonsters', 'knifeFalchionOld', 0.3, 12, 9);
 
@@ -43,6 +45,7 @@ pgClient.connect()
 console.log('CONNECTED');
 
 const security = new Security(dbInterface);
+const questing = new Questing(dbInterface);
 
 const app = express();
 
@@ -52,6 +55,7 @@ app.use(express.urlencoded({ extended: true }));
 
 addUserRoutes(app, dbInterface, security);
 addInventoryRoutes(app, dbInterface, security);
+addQuestRoutes(app, dbInterface, security, questing);
 
 app.use((error: Error, req: express.Request, res: express.Response, next: Function) => {
 	errorHandler(error);

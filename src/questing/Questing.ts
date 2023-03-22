@@ -1,19 +1,20 @@
-import { BaseModelId } from "database/BaseModel";
 import ContainerItem from "database/ContainerItem";
 import DbInterface from "database/DbInterface";
+
+import { BaseModelId } from "database/BaseModel";
+import User from "database/User";
 import Quest from "database/Quest";
 import QuestUser from "database/QuestUser";
-import User from "database/User";
 
 // What UTC hour a day starts as. Only positive values allowed.
 const DAY_START_HOURS = 8;
 // How many ms a quest can be done for before needing a "refresh".
 const BASE_TIME_LIMIT = 15 * 60 * 1000;
 
-class AlreadyOnQuest extends Error {}
-class QuestNotActiveToday extends Error {}
+export class AlreadyOnQuest extends Error {}
+export class QuestNotActiveToday extends Error {}
 
-class Questing {
+export default class Questing {
 	private lastDayEndCheck?: Date = undefined;
 
 	constructor(

@@ -43,7 +43,7 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 		});
 	} catch (error) {
 		if (error.code === '23505') {
-			res.status(400).json({
+			res.status(409).json({
 				'message': ((error.constraint as string).match(/_username_/) ? 'Username' : 'Email') + ' already taken',
 			});
 		} else {

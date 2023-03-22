@@ -6,7 +6,9 @@ import BaseModel, { DbColumn } from './BaseModel';
 export default class Quest extends BaseModel {
 	static tableName = 'quest';
 	static columns: DbColumn[] = BaseModel.columns.concat([
-		{ name: 'onDate', type: 'DATE', injectConstructor: true, nullable: true },
+		{ name: 'startTime', type: 'DATE', injectConstructor: true },
+		{ name: 'endTime', type: 'DATE', injectConstructor: true },
+		{ name: 'displayName', type: 'TEXT', injectCostructor: true },
 		{ name: 'collection', type: 'TEXT', injectCostructor: true },
 		{ name: 'special', type: 'TEXT', injectCostructor: true, nullable: true },
 		{ name: 'prefix', type: 'TEXT[]', injectCostructor: true, nullable: true },
@@ -19,6 +21,7 @@ export default class Quest extends BaseModel {
 		public startTime: Date,
 		// Last date where this quest occurs. Set very high for unending quest.
 		public endTime: Date,
+		public displayName: string,
 		public collection: ContainerCollection,
 		public special: SpecialCollection | undefined,
 		public prefix: Prefix[],

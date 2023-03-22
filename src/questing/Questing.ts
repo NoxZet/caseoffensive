@@ -10,6 +10,9 @@ const DAY_START_HOURS = 8;
 // How many ms a quest can be done for before needing a "refresh".
 const BASE_TIME_LIMIT = 15 * 60 * 1000;
 
+class AlreadyOnQuest extends Error {}
+class QuestNotActiveToday extends Error {}
+
 class Questing {
 	private lastDayEndCheck?: Date = undefined;
 
@@ -17,21 +20,27 @@ class Questing {
 		public dbInterface: DbInterface,
 	) {}
 
-	async startUserQuest(user: User & BaseModelId, quest: Quest & BaseModelId): Promise<boolean> {
+	async startUserQuest(user: User & BaseModelId, quest: Quest & BaseModelId): Promise<true> {
+		const now = new Date();
+		const currentDay = this.getTimeDay(now);
+		if (quest.startTime > currentDay || quest.endTime < currentDay) {
+			throw new QuestNotActiveToday();
+		}
 		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND finalLength IS NULL',
+			'WHERE user_id = $1 AND final_length IS NULL',
 			[user.id]
 		);
 		if (currentQuests.length > 0) {
-			return false;
+			throw new AlreadyOnQuest();
 		}
-		const questUser = new QuestUser(quest.id, user.id, new Date());
+		const questUser = new QuestUser(quest.id, user.id, now);
 		return await this.dbInterface.insertModel(questUser);
 	}
 
 	async completeUsersQuest(user: User & BaseModelId): Promise<boolean> {
+		// TODO: return the drops for displaying
 		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND finalLength IS NULL',
+			'WHERE user_id = $1 AND final_length IS NULL',
 			[user.id]
 		);
 		if (currentQuests.length === 0) {
@@ -45,7 +54,7 @@ class Questing {
 		const currentDay = this.getTimeDay(new Date());
 		if (!this.lastDayEndCheck || this.lastDayEndCheck.getTime() !== currentDay.getTime()) {
 			const currentQuests = await this.dbInterface.selectModel(QuestUser,
-				'WHERE finalLength IS NULL'
+				'WHERE final_length IS NULL'
 			);
 			for (const currentQuest of currentQuests) {
 				if (currentQuest.startTime < currentDay) {

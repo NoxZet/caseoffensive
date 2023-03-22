@@ -15,14 +15,16 @@ export default class Quest extends BaseModel {
 	]);
 
 	constructor(
-		// What date is this quest active; if null, this is used for QuestSchedule
-		public onDate: Date | null,
+		// First date where this quest occurs
+		public startTime: Date,
+		// Last date where this quest occurs. Set very high for unending quest.
+		public endTime: Date,
 		public collection: ContainerCollection,
 		public special: SpecialCollection | undefined,
 		public prefix: Prefix[],
 		// Interval, number of ms to complete quest once
 		public baseLength: number,
 		// Interval, number of ms allowed to do this quest for
-		public limit: number,
+		public timeLimit: number,
 	) {super();}
 }

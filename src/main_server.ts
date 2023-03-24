@@ -15,6 +15,7 @@ import QuestUser from 'database/QuestUser';
 import addUserRoutes from 'routes/userRoutes';
 import addInventoryRoutes from 'routes/inventoryRoutes';
 import addQuestRoutes from 'routes/questRoutes';
+import QuestResult from 'database/QuestResult';
 
 //const container = new ContainerItem('caseChroma', 'knife1Chroma', 1, 0, ['souvenir', 'stattrak', 'festive'], 'godsMonsters', 'knifeFalchionOld', 0.3, 12, 9);
 
@@ -31,7 +32,7 @@ const pgClient = new Client({
 })
 pgClient.connect()
 .then(async () => {
-	const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem, Quest, QuestUser]);
+	const dbInterface = new DbInterface(pgClient, [User, ContainerItem, SkinItem, Quest, QuestResult, QuestUser]);
 	try {
 		await dbInterface.updateDatabase();
 		return dbInterface;

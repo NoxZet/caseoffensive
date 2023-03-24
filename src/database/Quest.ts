@@ -8,12 +8,9 @@ export default class Quest extends BaseModel {
 	static columns: DbColumn[] = BaseModel.columns.concat([
 		{ name: 'startTime', type: 'DATE', injectConstructor: true },
 		{ name: 'endTime', type: 'DATE', injectConstructor: true },
-		{ name: 'displayName', type: 'TEXT', injectCostructor: true },
-		{ name: 'collection', type: 'TEXT', injectCostructor: true },
-		{ name: 'special', type: 'TEXT', injectCostructor: true, nullable: true },
-		{ name: 'prefix', type: 'TEXT[]', injectCostructor: true, nullable: true },
-		{ name: 'baseLength', type: 'INTERVAL', injectCostructor: true },
-		{ name: 'timeLimit', type: 'INTERVAL', injectCostructor: true, nullable: true },
+		{ name: 'displayName', type: 'TEXT', injectConstructor: true },
+		{ name: 'baseLength', type: 'INTERVAL', injectConstructor: true },
+		{ name: 'timeLimit', type: 'INTERVAL', injectConstructor: true, nullable: true },
 	]);
 
 	constructor(
@@ -22,9 +19,6 @@ export default class Quest extends BaseModel {
 		// Last date where this quest occurs. Set very high for unending quest.
 		public endTime: Date,
 		public displayName: string,
-		public collection: ContainerCollection,
-		public special: SpecialCollection | undefined,
-		public prefix: Prefix[],
 		// Interval, number of ms to complete quest once
 		public baseLength: number,
 		// Interval, number of ms allowed to do this quest for

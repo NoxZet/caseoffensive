@@ -1,7 +1,7 @@
 export type DbColumnPrimary =
 { name: string, primaryKey: true, injectConstructor?: true };
 export type DbColumnNonPrimary =
-{ name: string, type: string, foreignKey?: string, nullable?: true, injectCostructor?: true, unique?: true };
+{ name: string, type: string, foreignKey?: string, nullable?: true, injectConstructor?: true, unique?: true };
 /**
  * - name: Name of the property to set. Database column name is generated from snake_case of this name.
  * - type: Postgres column type

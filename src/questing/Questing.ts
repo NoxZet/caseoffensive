@@ -5,6 +5,7 @@ import { BaseModelId } from "database/BaseModel";
 import User from "database/User";
 import Quest from "database/Quest";
 import QuestUser from "database/QuestUser";
+import QuestResult from "database/QuestResult";
 
 // What UTC hour a day starts as. Only positive values allowed.
 const DAY_START_HOURS = 8;
@@ -38,19 +39,6 @@ export default class Questing {
 		return await this.dbInterface.insertModel(questUser);
 	}
 
-	async completeUsersQuest(user: User & BaseModelId): Promise<boolean> {
-		// TODO: return the drops for displaying
-		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND final_length IS NULL',
-			[user.id]
-		);
-		if (currentQuests.length === 0) {
-			return false;
-		}
-		const currentQuest = currentQuests[0];
-		return this.completeGivenQuest(currentQuest);
-	}
-
 	async checkLastDay() {
 		const currentDay = this.getTimeDay(new Date());
 		if (!this.lastDayEndCheck || this.lastDayEndCheck.getTime() !== currentDay.getTime()) {
@@ -66,14 +54,15 @@ export default class Questing {
 		}
 	}
 
-	createDrops(currentQuest: QuestUser & BaseModelId, dropCount: number, quest: Quest): Promise<true> {
+	createDrops(currentQuest: QuestUser & BaseModelId, dropCount: number, quest: Quest & BaseModelId): Promise<true> {
 		if (dropCount <= 0) {
 			return this.dbInterface.deleteModel(currentQuest);
 		}
 		// Could be improved by adding method for multiple insertions in one query
 		// Needs a transaction, however, we need separate connection/pool for each request for that
-		return new Promise<true>((resolve, reject) => {
+		return new Promise<true>(async (resolve, reject) => {
 			let insertsLeft = dropCount;
+			// Function that's called for every drop finished
 			const resolveOne = () => {
 				insertsLeft--;
 				if (insertsLeft === 0) {
@@ -83,17 +72,61 @@ export default class Questing {
 					.catch(error => reject(error));
 				}
 			}
+			// Select possible quest results
+			const results = await this.dbInterface.selectModel(QuestResult,
+				'WHERE quest_id = $1', [quest.id]
+			);
+			let totalTickets = results.reduce((cum, result) => result.tickets + cum, 0);
+			if (totalTickets <= 0) {
+				throw new Error(`Quest (id=${quest.id}, name=${quest.displayName}) does not have any results`);
+			}
 			// Create drops
-			for (let i = 0; i < dropCount; i++) {
-				const container = new ContainerItem(quest.collection, quest.special);
-				container.original_owner_id = currentQuest.user_id;
-				container.owner_id = currentQuest.user_id;
-				container.created_at = new Date();
-				this.dbInterface.insertModel(container)
-				.then(() => resolveOne())
-				.catch(error => reject(error));
+			nextDrop: for (let i = 0; i < dropCount; i++) {
+				const ticket = Math.floor(Math.random() * totalTickets);
+				let cum = 0;
+				// Find correct drop for the generated ticket
+				for (const result of results) {
+					cum += result.tickets;
+					if (ticket < cum) {
+						const container = new ContainerItem(result.collection, result.special);
+						container.original_owner_id = currentQuest.user_id;
+						container.owner_id = currentQuest.user_id;
+						container.created_at = new Date();
+						this.dbInterface.insertModel(container)
+						.then(() => resolveOne())
+						.catch(error => reject(error));
+						continue nextDrop;
+					}
+				}
+				throw new Error(`Quest (id=${quest.id}, name=${quest.displayName}) didn't find result for ticket ${ticket}`);
 			}
 		});
+	}
+
+	async cancelUsersQuest(user: User & BaseModelId): Promise<boolean> {
+		// TODO: return the drops for displaying
+		const currentQuests = await this.dbInterface.selectModel(QuestUser,
+			'WHERE user_id = $1 AND final_length IS NULL',
+			[user.id]
+		);
+		if (currentQuests.length === 0) {
+			return false;
+		}
+		await this.dbInterface.deleteModel(currentQuests[0]);
+		return true;
+	}
+
+	async completeUsersQuest(user: User & BaseModelId): Promise<boolean> {
+		// TODO: return the drops for displaying
+		const currentQuests = await this.dbInterface.selectModel(QuestUser,
+			'WHERE user_id = $1 AND final_length IS NULL',
+			[user.id]
+		);
+		if (currentQuests.length === 0) {
+			return false;
+		}
+		const currentQuest = currentQuests[0];
+		return this.completeGivenQuest(currentQuest);
 	}
 
 	async completeGivenQuest(currentQuest: QuestUser & BaseModelId): Promise<true> {
@@ -101,7 +134,7 @@ export default class Questing {
 		const quest = await this.dbInterface.selectModelById(Quest, currentQuest.quest_id);
 		// Find how many drops were gotten before the day end
 		const currentQuestEnd = new Date(Math.min(
-			new Date().getTime(),
+			(new Date()).getTime(),
 			this.getNextDay(currentQuest.startTime).getTime()
 		));
 		const lapsed = Math.min(currentQuestEnd.getTime() - currentQuest.startTime.getTime(), BASE_TIME_LIMIT);

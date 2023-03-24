@@ -4,10 +4,10 @@ import BaseModel, { DbColumn } from './BaseModel';
 export default class QuestUser extends BaseModel {
 	static tableName = 'quest_user';
 	static columns: DbColumn[] = BaseModel.columns.concat([
-		{ name: 'quest_id', type: 'INT', foreignKey: 'quest(id)' },
-		{ name: 'user_id', type: 'INT', foreignKey: 'users(id)' },
+		{ name: 'quest_id', type: 'INT', foreignKey: 'quest(id)', injectConstructor: true },
+		{ name: 'user_id', type: 'INT', foreignKey: 'users(id)', injectConstructor: true },
 		{ name: 'startTime', type: 'TIMESTAMP', injectConstructor: true },
-		{ name: 'finalLength', type: 'INTERVAL', injectCostructor: true, nullable: true },
+		{ name: 'finalLength', type: 'INTERVAL', injectConstructor: true, nullable: true },
 	]);
 
 	constructor(

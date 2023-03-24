@@ -6,24 +6,24 @@ import BaseItem from './BaseItem';
 export default class ContainerItem extends BaseItem {
 	static tableName = 'container_item';
 	static columns: DbColumn[] = BaseItem.columns.concat([
-		{ name: 'mainCollection', type: 'TEXT', injectCostructor: true },
-		{ name: 'mainSpecial', type: 'TEXT', injectCostructor: true, nullable: true },
-		{ name: 'level', type: 'INT', injectCostructor: true, nullable: true },
-		{ name: 'exp', type: 'INT', injectCostructor: true, nullable: true },
-		{ name: 'prefix', type: 'TEXT[]', injectCostructor: true, nullable: true },
-		{ name: 'sideCollection', type: 'TEXT', injectCostructor: true, nullable: true },
-		{ name: 'sideSpecial', type: 'TEXT', injectCostructor: true, nullable: true },
-		{ name: 'sideChance', type: 'DOUBLE PRECISION', injectCostructor: true },
-		{ name: 'covertBoost', type: 'DOUBLE PRECISION', injectCostructor: true },
-		{ name: 'specialBoost', type: 'DOUBLE PRECISION', injectCostructor: true },
+		{ name: 'mainCollection', type: 'TEXT', injectConstructor: true },
+		{ name: 'mainSpecial', type: 'TEXT', injectConstructor: true, nullable: true },
+		{ name: 'prefix', type: 'TEXT[]', injectConstructor: true },
+		{ name: 'level', type: 'INT', injectConstructor: true, nullable: true },
+		{ name: 'exp', type: 'INT', injectConstructor: true, nullable: true },
+		{ name: 'sideCollection', type: 'TEXT', injectConstructor: true, nullable: true },
+		{ name: 'sideSpecial', type: 'TEXT', injectConstructor: true, nullable: true },
+		{ name: 'sideChance', type: 'DOUBLE PRECISION', injectConstructor: true },
+		{ name: 'covertBoost', type: 'DOUBLE PRECISION', injectConstructor: true },
+		{ name: 'specialBoost', type: 'DOUBLE PRECISION', injectConstructor: true },
 	]);
 
 	constructor(
 		public mainCollection: ContainerCollection,
 		public mainSpecial?: SpecialCollection | undefined,
+		public prefix: Prefix[] = [],
 		public level: number = 1,
 		public exp: number = 0,
-		public prefix: Prefix[] = [],
 		// Imported contraband collection
 		public sideCollection?: ContainerCollection | undefined,
 		public sideSpecial?: SpecialCollection | undefined,

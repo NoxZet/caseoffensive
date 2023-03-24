@@ -54,21 +54,23 @@ export default class Questing {
 		}
 	}
 
-	createDrops(currentQuest: QuestUser & BaseModelId, dropCount: number, quest: Quest & BaseModelId): Promise<true> {
+	createDrops(currentQuest: QuestUser & BaseModelId, dropCount: number, quest: Quest & BaseModelId): Promise<ContainerItem[]> {
 		if (dropCount <= 0) {
-			return this.dbInterface.deleteModel(currentQuest);
+			return this.dbInterface.deleteModel(currentQuest)
+			.then(_ => []);
 		}
 		// Could be improved by adding method for multiple insertions in one query
 		// Needs a transaction, however, we need separate connection/pool for each request for that
-		return new Promise<true>(async (resolve, reject) => {
+		return new Promise<ContainerItem[]>(async (resolve, reject) => {
 			let insertsLeft = dropCount;
+			const droppedContainers: ContainerItem[] = [];
 			// Function that's called for every drop finished
 			const resolveOne = () => {
 				insertsLeft--;
 				if (insertsLeft === 0) {
 					currentQuest.finalLength = dropCount * quest.baseLength;
 					this.dbInterface.insertModel(currentQuest)
-					.then(() => resolve(true))
+					.then(() => resolve(droppedContainers))
 					.catch(error => reject(error));
 				}
 			}
@@ -92,6 +94,7 @@ export default class Questing {
 						container.original_owner_id = currentQuest.user_id;
 						container.owner_id = currentQuest.user_id;
 						container.created_at = new Date();
+						droppedContainers.push(container);
 						this.dbInterface.insertModel(container)
 						.then(() => resolveOne())
 						.catch(error => reject(error));
@@ -116,7 +119,7 @@ export default class Questing {
 		return true;
 	}
 
-	async completeUsersQuest(user: User & BaseModelId): Promise<boolean> {
+	async completeUsersQuest(user: User & BaseModelId): Promise<ContainerItem[] | false> {
 		// TODO: return the drops for displaying
 		const currentQuests = await this.dbInterface.selectModel(QuestUser,
 			'WHERE user_id = $1 AND final_length IS NULL',
@@ -129,7 +132,7 @@ export default class Questing {
 		return this.completeGivenQuest(currentQuest);
 	}
 
-	async completeGivenQuest(currentQuest: QuestUser & BaseModelId): Promise<true> {
+	async completeGivenQuest(currentQuest: QuestUser & BaseModelId): Promise<ContainerItem[]> {
 		// TODO: implement quest timeLimit (needs fetching of other QuestUser for the day)
 		const quest = await this.dbInterface.selectModelById(Quest, currentQuest.quest_id);
 		// Find how many drops were gotten before the day end

@@ -6,6 +6,7 @@ import Questing, { AlreadyOnQuest, QuestNotActiveToday } from 'questing/Questing
 import { BaseModelId } from 'database/BaseModel';
 import User from 'database/User';
 import Quest from 'database/Quest';
+import QuestResult from 'database/QuestResult';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security, questing: Questing) {
 	app.get('/quest', async function (req: express.Request, res: express.Response, next: Function) {
@@ -13,9 +14,19 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 		const quests = await dbInterface.selectModel(Quest, 
 			'WHERE start_time <= $1 AND end_time >= $1', [today]
 		);
-		// TODO: return array of items that can drop for each quest
+		// Fetch QuestResults for the given Quests into an extra map
+		const questResults: { [key: number]: QuestResult[] } = {};
+		for (const quest of quests) {
+			questResults[quest.id] = await dbInterface.selectModel(QuestResult,
+				'WHERE quest_id = $1', [quest.id]
+			);
+		}
 		res.status(200).json(
-			quests.map(quest => ({id: quest.id, name: quest.displayName}))
+			quests.map(quest => ({
+				id: quest.id,
+				name: quest.displayName,
+				results: questResults[quest.id] ? questResults[quest.id].map(result => result.toResource()) : [],
+			}))
 		);
 	});
 
@@ -52,10 +63,11 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 	app.post('/questing/complete', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
 		const user: User & BaseModelId = res.locals.user;
 		try {
-			if (await questing.completeUsersQuest(user)) {
+			const drops = await questing.completeUsersQuest(user);
+			if (drops) {
 				// TODO: show drops here
 				res.status(200).json({
-					'message': 'OK',
+					'drops': drops.map(container => container.toResource()),
 				});
 			} else {
 				res.status(404).json({

@@ -1,5 +1,6 @@
 import { Client } from "pg";
 import BaseModel, { BaseModelId, DbColumn, DbColumnNonPrimary, DbModel } from "./BaseModel";
+import PostgresInterval from "postgres-interval";
 
 export class MissingId extends Error {}
 export class NoResult extends Error {}
@@ -151,6 +152,13 @@ export default class DbInterface {
 		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
 
+	private insertValueExpression(column: DbColumn, i: number) {
+		if ('type' in column && column.type === 'INTERVAL') {
+			return `$${i} * INTERVAL '1 millisecond'`;
+		}
+		return `$${i}`;
+	}
+
 	insertModel(model: BaseModel): Promise<true> {
 		for (const OneClass of this.classes) {
 			if (model instanceof OneClass) {
@@ -166,14 +174,14 @@ export default class DbInterface {
 					if (!('primaryKey' in column) || (model as any)[column.name]) {
 						i++;
 						queryColumnNames.push(this.getDbColumnName(column.name));
-						queryColumnValues.push(`$${i}`);
+						queryColumnValues.push(this.insertValueExpression(column, i));
 						parameters.push((model as any)[column.name]);
 					}
 					if ('primaryKey' in column) {
 						primaryKey = column;
 					} else {
 						// The block with i++ will always happen if this block happens
-						updateRows.push(`${this.getDbColumnName(column.name)} = $${i}`);
+						updateRows.push(`${this.getDbColumnName(column.name)} = ${this.insertValueExpression(column, i)}`);
 					}
 				}
 				// Create query string using the column strings INSERT INTO <tableName> (column1, ...) VALUES ($1, ...)
@@ -197,11 +205,19 @@ export default class DbInterface {
 		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
 
+	private columnSelectExpression(column: DbColumn) {
+		if ('type' in column && column.type === 'INTERVAL') {
+			return `(EXTRACT (EPOCH FROM ${this.getDbColumnName(column.name)}) * 1000)::INT`
+				+ ` AS ${this.getDbColumnName(column.name)}`;
+		}
+		return this.getDbColumnName(column.name);
+	}
+
 	selectModel<Model extends BaseModel>(OneClass: DbModel<Model>, conditions: string = '', parameters: any[] = []): Promise<(Model & BaseModelId)[]> {
 		const columns = [];
 		// Build a list of columns to select and a query string
 		for (const column of OneClass.columns) {
-			columns.push(this.getDbColumnName(column.name));
+			columns.push(this.columnSelectExpression(column));
 		}
 		const query = `SELECT ${columns.join(', ')} FROM ${OneClass.tableName} ${conditions}`;
 		return new Promise((resolve, reject) => {
@@ -210,7 +226,7 @@ export default class DbInterface {
 				// Bind each row onto a model object
 				for (const row of returned.rows) {
 					const constructorParams = [];
-					// injectCostructor columns are pushed onto array to be passed into constructor
+					// injectConstructor columns are pushed onto array to be passed into constructor
 					for (const column of OneClass.columns) {
 						if ('injectConstructor' in column) {
 							constructorParams.push(row[this.getDbColumnName(column.name)]);

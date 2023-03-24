@@ -1,6 +1,7 @@
 import { ContainerCollection, SpecialCollection } from 'opening/collectionRegister'
 import { Prefix } from 'opening/prefixRegister';
 import BaseModel, { DbColumn } from './BaseModel';
+import ContainerResource from 'resource/Container';
 
 // Represents a quest that can be started on a given date, giving specified containers
 export default class QuestResult extends BaseModel {
@@ -20,4 +21,21 @@ export default class QuestResult extends BaseModel {
 		public special: SpecialCollection | undefined,
 		public prefix: Prefix[],
 	) {super();}
+
+	toResource(): ContainerResource {
+		return {
+			id: undefined,
+			owner_id: undefined,
+			mainCollection: this.collection,
+			mainSpecial: this.special,
+			prefix: this.prefix,
+			level: 1,
+			exp: 0,
+			sideCollection: undefined,
+			sideSpecial: undefined,
+			sideChance: 0,
+			covertBoost: 0,
+			specialBoost: 0,
+		};
+	}
 }

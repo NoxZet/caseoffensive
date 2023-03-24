@@ -1,6 +1,8 @@
 import { Weapon, Quality } from 'opening/skinRegister'
 import { DbColumn } from './BaseModel';
 import BaseItem from './BaseItem';
+import SkinResource from 'resource/Skin';
+import { Prefix } from 'opening/prefixRegister';
 
 export default class SkinItem extends BaseItem {
 	static tableName = 'skin_item';
@@ -20,7 +22,21 @@ export default class SkinItem extends BaseItem {
 		public quality: Quality,
 		public wear: number | null,
 		public level: number,
-		public prefix: string[],
+		public prefix: Prefix[],
 		public stattrak: number = 0,
 	) {super();}
+
+	toResource(): SkinResource {
+		return {
+			id: this.id,
+			owner_id: this.owner_id,
+			weapon: this.weapon,
+			skin: this.skin,
+			quality: this.quality,
+			wear: this.wear,
+			level: this.level,
+			prefix: this.prefix,
+			stattrak: this.stattrak,
+		}
+	}
 }

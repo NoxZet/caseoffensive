@@ -15,7 +15,7 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 		);
 		// TODO: return array of items that can drop for each quest
 		res.status(200).json(
-			quests.map(quest => ({id: quest.id, name: quest.displayName, collection: quest.collection}))
+			quests.map(quest => ({id: quest.id, name: quest.displayName}))
 		);
 	});
 
@@ -32,20 +32,56 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 			const quest = await dbInterface.selectModelById(Quest, quest_id);
 			await questing.startUserQuest(user, quest);
 			res.status(200).json({
-				'message': 'OK'
+				'message': 'OK',
 			});
 		} catch (error) {
 			if (error instanceof NoResult || error instanceof QuestNotActiveToday) {
 				res.status(404).json({
-					'message': 'Invalid quest'
+					'message': 'Invalid quest',
 				});
 			} else if (error instanceof AlreadyOnQuest) {
 				res.status(409).json({
-					'message': 'Already at different quest'
+					'message': 'Already on a different quest',
 				});
 			} else {
 				next(error);
 			}
+		}
+	});
+
+	app.post('/questing/complete', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
+		const user: User & BaseModelId = res.locals.user;
+		try {
+			if (await questing.completeUsersQuest(user)) {
+				// TODO: show drops here
+				res.status(200).json({
+					'message': 'OK',
+				});
+			} else {
+				res.status(404).json({
+					'message': 'Not on a quest',
+				});
+			}
+		} catch (error) {
+			next(error);
+		}
+	});
+
+	app.delete('/questing', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
+		const user: User & BaseModelId = res.locals.user;
+		try {
+			if (await questing.cancelUsersQuest(user)) {
+				// TODO: show drops here
+				res.status(200).json({
+					'message': 'OK',
+				});
+			} else {
+				res.status(404).json({
+					'message': 'Not on a quest',
+				});
+			}
+		} catch (error) {
+			next(error);
 		}
 	});
 };

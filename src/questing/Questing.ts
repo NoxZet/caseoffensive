@@ -153,9 +153,9 @@ export default class Questing {
 		const day = new Date(now);
 		day.setUTCHours(DAY_START_HOURS, 0, 0, 0);
 		if (now < day) {
-			day.setDate(day.getDate() - 1);
+			day.setUTCDate(day.getUTCDate() - 1);
 		}
-		day.setDate(day.getDate() + offset);
+		day.setUTCDate(day.getUTCDate() + offset);
 		return day;
 	}
 

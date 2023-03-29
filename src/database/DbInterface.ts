@@ -152,6 +152,17 @@ export default class DbInterface {
 		throw new Error(`Cannot find DbModel for object of '${model.constructor.name}' class`);
 	}
 
+	deleteQuery<Model extends BaseModel>(OneClass: DbModel<Model>, conditions: string = '', parameters: any[] = []): Promise<true> {
+		const columns = [];
+		// Build a list of columns to select and a query string
+		for (const column of OneClass.columns) {
+			columns.push(this.columnSelectExpression(column));
+		}
+		const query = `DELETE FROM ${OneClass.tableName} ${conditions}`;
+		return this.client.query(query, parameters)
+		.then(returned => true);
+	}
+
 	private insertValueExpression(column: DbColumn, i: number) {
 		if ('type' in column && column.type === 'INTERVAL') {
 			return `$${i} * INTERVAL '1 millisecond'`;

@@ -4,9 +4,11 @@ import crypto from 'crypto';
 import { BaseModelId } from 'database/BaseModel';
 import DbInterface from 'database/DbInterface';
 import User from 'database/User';
+import UserSession from 'database/UserSession';
 
 const SALT_ROUNDS = 10;
 const SESSION_BYTES = 64;
+const EXPIRY_DAYS = 7;
 
 export class InvalidCredentials extends Error {}
 export class InvalidToken extends Error {}
@@ -14,7 +16,6 @@ export class InvalidToken extends Error {}
 export default class Security {
 	/** Pass as middleware to get error if user is not authenticated or User object in res.locals.user if they are */
 	public readonly getUserMiddleware: (req: express.Request, res: express.Response, next: Function) => void;
-	private sessions: {[key: string]: {userId: number, lastAccess: Date}} = {};
 
 	constructor(
 		private dbInterface: DbInterface
@@ -63,6 +64,12 @@ export default class Security {
 		});
 	}
 
+	getExpiryDate(): Date {
+		const date = new Date();
+		date.setUTCDate(date.getUTCDate() + 1);
+		return date;
+	}
+
 	async verifyUser(username: string, ptPassword: string): Promise<User & BaseModelId> {
 		const users = await this.dbInterface.selectModel(User, 'WHERE username = $1', [username]);
 		if (users.length < 1) {
@@ -77,29 +84,41 @@ export default class Security {
 		const user = await this.verifyUser(username, ptPassword);
 		const buffer = await this.randomBytes(SESSION_BYTES);
 		const token = buffer.toString('base64url');
-		this.sessions[token] = {
-			userId: user.id,
-			lastAccess: new Date(),
-		};
+		const session = new UserSession(user.id, token, this.getExpiryDate());
+		await this.dbInterface.insertModel(session);
 		return token;
 	}
 
-	deleteSession(token: string): void {
-		delete this.sessions[token];
+	getUserSession(token: string): Promise<UserSession & BaseModelId | undefined> {
+		return this.dbInterface.selectModel(UserSession, 'WHERE token = $1', [token])
+		.then(sessions => sessions[0]);
+	}
+
+	async deleteSession(token: string): Promise<true> {
+		const userSession = await this.getUserSession(token);
+		if (userSession) {
+			await this.dbInterface.deleteModel(userSession);
+		}
+		return true;
 	}
 
 	async getUser(token: string): Promise<User & BaseModelId> {
-		if (!this.sessions[token]) {
+		// Delete expired tokens first
+		await this.dbInterface.deleteQuery(UserSession, 'WHERE expire_at < $1', [new Date()]);
+		const userSession = await this.getUserSession(token);
+		if (!userSession) {
 			throw new InvalidToken();
 		}
-		const users = await this.dbInterface.selectModel(User, 'WHERE id = $1', [this.sessions[token].userId]);
+		const user = await this.dbInterface.selectModelByIdOrNull(User, userSession.user_id);
 		// User has disappeared
-		if (users.length < 1) {
-			delete this.sessions[token];
+		if (!user) {
+			await this.dbInterface.deleteModel(userSession);
 			throw new InvalidToken();
-		} else {
-			return users[0];
 		}
+		// Extend session expiry
+		userSession.expireAt = this.getExpiryDate();
+		await this.dbInterface.insertModel(userSession);
+		return user;
 	}
 
 	private getUserMiddlewareMethod(req: express.Request, res: express.Response, next: Function) {

@@ -2,7 +2,7 @@ import { DbColumn } from './BaseModel';
 import BaseModel from "./BaseModel";
 
 export default class User extends BaseModel {
-	static tableName = 'users';
+	static tableName = 'users'; // user is a reserved Postgres word
 	static columns: DbColumn[] = BaseModel.columns.concat([
 		{ name: 'username', type: 'TEXT', injectConstructor: true, unique: true },
 		{ name: 'email', type: 'TEXT', injectConstructor: true, unique: true },

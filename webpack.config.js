@@ -4,9 +4,9 @@ const webpack = require('webpack');
 module.exports = (env, options) => {
   const result = [];
   /** Server Config */
-  for (let [configFilename, outputDirname] of [['main_server', 'server'], ['main_client', 'public']]) {
+  for (let [configFilename, outputDirname, target] of [['main_server', 'server', 'node'], ['main_client', 'public', 'web']]) {
     result.push({
-      target: 'node',
+      target: target,
       entry: `./src/${configFilename}.ts`,
       output: {
         path: path.resolve(__dirname, outputDirname),

@@ -1,6 +1,6 @@
 import express from 'express';
-import DbInterface from 'database/DbInterface';
-import Security, { InvalidCredentials } from 'server/Security';
+import DbInterface, { NoResult } from 'database/DbInterface';
+import Security, { InvalidCredentials, InvalidToken } from 'server/Security';
 import User from 'database/User';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security) {
@@ -50,6 +50,42 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 			next(error);
 		}
 	}
+});
+
+app.get('/user', async function (req: express.Request, res: express.Response, next: Function) {
+	if (typeof req.query.token === 'string') {
+		security.getUser(req.query.token)
+		.then(user => {
+			res.status(200).json([user.toResource()]);
+		})
+		.catch(error => {
+			if (error instanceof InvalidToken) {
+				res.status(200).json([]);
+			} else {
+				next(error);
+			}
+		});
+	} else {
+		res.status(400).json({
+			'message': 'Must specify token parameter',
+		});
+	}
+});
+
+app.get('/user/:userId([0-9]+)', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
+	dbInterface.selectModelById(User, parseInt(req.params.userId))
+	.then(user => {
+		res.status(200).json(user.toResource());
+	})
+	.catch(error => {
+		if (error instanceof NoResult) {
+			res.status(404).json({
+				'message': 'Invalid user'
+			});
+		} else {
+			next(error);
+		}
+	})
 });
 
 // Log in (create session)

@@ -3,19 +3,22 @@ import { Root } from "react-dom/client";
 import axios, { AxiosResponse } from "axios";
 
 import LoginForm from "components/LoginForm";
-import RegisterForm from "components/LoginForm";
+import RegisterForm from "components/RegisterForm";
 import User from "resource/User";
 
-type Logged = 'notLogged' | 'checking' | User;
+type Logged = false | User;
 const storageKeyToken = 'case_token';
 
 const App = () => {
-	const [loggedUser, setLoggedUser] = useState<Logged>('checking');
+	const [loading, setLoading] = useState(true);
+	const [loggedUser, setLoggedUser] = useState<Logged>(false);
 	const [currentScreen, setCurrentScreen] = useState<string>('');
 	const [currentError, setCurrentError] = useState<string>('');
-	useEffect(() => {
+
+	function loadToken() {
 		const token = localStorage.getItem(storageKeyToken);
 		if (token) {
+			setLoading(true);
 			axios.get('/user', {
 				params: {
 					token: token,
@@ -26,18 +29,23 @@ const App = () => {
 				if (users.length === 0) {
 					// TODO: Display 'Login expired'
 					localStorage.removeItem(storageKeyToken)
-					setLoggedUser('notLogged');
+					setLoggedUser(false);
 				} else {
 					setLoggedUser(users[0]);
 				}
 			})
 			.catch(error => {
 				console.error(error);
-			});
+			})
+			.finally(() => {
+				setLoading(false);
+			})
 		} else {
-			setLoggedUser('notLogged');
+			setLoading(false);
 		}
-	}, []);
+	}
+
+	useEffect(loadToken, []);
 
 	function displayError() {
 		if (currentError) {
@@ -48,26 +56,59 @@ const App = () => {
 	}
 
 	function displayLoader() {
-		if (loggedUser === 'checking') {
+		if (loading) {
 			return <div className="loader">loader</div>
 		} else {
 			return null;
 		}
 	}
 
+	function onSubmitLogin(username: string, password: string): void {
+		axios.post('/session', {
+			username: username,
+			password: password,
+		})
+		.then(response => {
+			const token: string = response.data.token;
+			localStorage.setItem(storageKeyToken, token);
+			loadToken();
+		})
+		.catch(error => {
+			if (error.response) {
+				const response: AxiosResponse = error.response;
+				if (response.status === 422) {
+					setCurrentError(response.data.message);
+				}
+			} else {
+				console.error(error);
+			}
+		})
+		.finally(() => {
+			setLoading(false);
+		});
+	}
+
+	function onSubmitRegister(email: string, username: string, password: string) {
+		// TODO
+		console.log(email, username, password);
+	}
+
 	// TODO: Make 'checking' loader cover whole screen (so login form doesn't flash before changing to logged in screen)
-	if (loggedUser === 'notLogged' || loggedUser === 'checking') {
+	if (loggedUser) {
+		return <div>Logged in as {loggedUser.username}</div>
+	} else {
 		const isRegister = currentScreen === 'register';
 		return <div className="app">
 			<h1>
 				{isRegister ? 'Create an account' : 'Login'}
 			</h1>
 			{displayError()}
-			{isRegister ? <RegisterForm/> : <LoginForm/>}
+			{isRegister
+				? <RegisterForm onSubmitRegister={onSubmitRegister} onError={() => {}}/>
+				: <LoginForm onSubmitLogin={onSubmitLogin}/>
+			}
 			{displayLoader()}
 		</div>
-	} else {
-		return <div>Logged in as {loggedUser.username}</div>
 	}
 }
 

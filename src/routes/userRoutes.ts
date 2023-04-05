@@ -42,6 +42,7 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 			'message': 'Account successfully created',
 		});
 	} catch (error) {
+		// Code for Postgres unique constraint fail
 		if (error.code === '23505') {
 			res.status(409).json({
 				'message': ((error.constraint as string).match(/_username_/) ? 'Username' : 'Email') + ' already taken',

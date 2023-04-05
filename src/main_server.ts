@@ -4,7 +4,7 @@ import errorHandler from 'server/errorHandler';
 
 import DbInterface from 'database/DbInterface';
 import Security from 'server/Security';
-import Questing from 'questing/Questing';
+import Questing from 'server/Questing';
 
 import User from 'database/User';
 import ContainerItem from 'database/ContainerItem';

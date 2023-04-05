@@ -1,7 +1,7 @@
 import express from 'express';
 import DbInterface, { NoResult } from 'database/DbInterface';
 import Security, { InvalidCredentials } from 'server/Security';
-import Questing, { AlreadyOnQuest, QuestNotActiveToday } from 'questing/Questing';
+import Questing, { AlreadyOnQuest, QuestNotActiveToday } from 'server/Questing';
 
 import { BaseModelId } from 'database/BaseModel';
 import User from 'database/User';

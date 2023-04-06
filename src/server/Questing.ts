@@ -22,17 +22,21 @@ export default class Questing {
 		public dbInterface: DbInterface,
 	) {}
 
+	async getCurrentQuest(user: User & BaseModelId): Promise<null | QuestUser & BaseModelId> {
+		const currentQuests = await this.dbInterface.selectModel(QuestUser,
+			'WHERE user_id = $1 AND final_length IS NULL',
+			[user.id]
+		);
+		return currentQuests.length === 0 ? null : currentQuests[0];
+	}
+
 	async startUserQuest(user: User & BaseModelId, quest: Quest & BaseModelId): Promise<true> {
 		const now = new Date();
 		const currentDay = this.getTimeDay(now);
 		if (quest.startTime > currentDay || quest.endTime < currentDay) {
 			throw new QuestNotActiveToday();
 		}
-		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND final_length IS NULL',
-			[user.id]
-		);
-		if (currentQuests.length > 0) {
+		if (await this.getCurrentQuest(user)) {
 			throw new AlreadyOnQuest();
 		}
 		const questUser = new QuestUser(quest.id, user.id, now);
@@ -108,27 +112,20 @@ export default class Questing {
 
 	async cancelUsersQuest(user: User & BaseModelId): Promise<boolean> {
 		// TODO: return the drops for displaying
-		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND final_length IS NULL',
-			[user.id]
-		);
-		if (currentQuests.length === 0) {
+		const currentQuest = await this.getCurrentQuest(user);
+		if (!currentQuest) {
 			return false;
 		}
-		await this.dbInterface.deleteModel(currentQuests[0]);
+		await this.dbInterface.deleteModel(currentQuest);
 		return true;
 	}
 
 	async completeUsersQuest(user: User & BaseModelId): Promise<ContainerItem[] | false> {
 		// TODO: return the drops for displaying
-		const currentQuests = await this.dbInterface.selectModel(QuestUser,
-			'WHERE user_id = $1 AND final_length IS NULL',
-			[user.id]
-		);
-		if (currentQuests.length === 0) {
+		const currentQuest = await this.getCurrentQuest(user);
+		if (!currentQuest) {
 			return false;
 		}
-		const currentQuest = currentQuests[0];
 		return this.completeGivenQuest(currentQuest);
 	}
 

@@ -2,7 +2,7 @@ import { ContainerCollection, SpecialCollection } from 'opening/collectionRegist
 import { Prefix } from 'opening/prefixRegister';
 
 type Container = {
-	id: number | undefined
+	id: number | undefined,
 	owner_id: number | undefined,
 	mainCollection: ContainerCollection,
 	mainSpecial: SpecialCollection | undefined,

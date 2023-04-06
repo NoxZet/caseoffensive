@@ -7,6 +7,7 @@ import { BaseModelId } from 'database/BaseModel';
 import User from 'database/User';
 import Quest from 'database/Quest';
 import QuestResult from 'database/QuestResult';
+import QuestResource from 'resource/Quest';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security, questing: Questing) {
 	app.get('/quest', async function (req: express.Request, res: express.Response, next: Function) {
@@ -21,12 +22,13 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 				'WHERE quest_id = $1', [quest.id]
 			);
 		}
+		const questResources: QuestResource[] = quests.map(quest => ({
+			id: quest.id,
+			name: quest.displayName,
+			results: questResults[quest.id] ? questResults[quest.id].map(result => result.toResource()) : [],
+		}));
 		res.status(200).json(
-			quests.map(quest => ({
-				id: quest.id,
-				name: quest.displayName,
-				results: questResults[quest.id] ? questResults[quest.id].map(result => result.toResource()) : [],
-			}))
+			questResources
 		);
 	});
 
@@ -58,6 +60,12 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 				next(error);
 			}
 		}
+	});
+	
+	app.get('/questing', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
+		const user: User & BaseModelId = res.locals.user;
+		const currentQuest = questing.getCurrentQuest(user);
+		res.status(200).json(currentQuest ? [currentQuest] : []);
 	});
 
 	app.post('/questing/complete', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {

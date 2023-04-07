@@ -1,8 +1,8 @@
-import Container from "./Container";
+import QuestResult from "./QuestResult";
 
 type Quest = {
 	id: number | undefined,
 	name: string,
-	results: Container[],
+	results: QuestResult[],
 };
-export default Container;
+export default Quest;

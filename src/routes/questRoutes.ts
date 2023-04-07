@@ -8,6 +8,7 @@ import User from 'database/User';
 import Quest from 'database/Quest';
 import QuestResult from 'database/QuestResult';
 import QuestResource from 'resource/Quest';
+import QuestingResource from 'resource/Questing';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security, questing: Questing) {
 	app.get('/quest', async function (req: express.Request, res: express.Response, next: Function) {
@@ -64,8 +65,13 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 	
 	app.get('/questing', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
 		const user: User & BaseModelId = res.locals.user;
-		const currentQuest = questing.getCurrentQuest(user);
-		res.status(200).json(currentQuest ? [currentQuest] : []);
+		const currentQuest = await questing.getCurrentQuest(user);
+		const result: QuestingResource[] = currentQuest ? [{
+			questId: currentQuest.quest_id,
+			startTime: currentQuest.startTime,
+			...(await questing.getCurrentDropCount(currentQuest)),
+		}] : []
+		res.status(200).json(result);
 	});
 
 	app.post('/questing/complete', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {

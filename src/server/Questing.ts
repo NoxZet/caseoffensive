@@ -71,6 +71,7 @@ export default class Questing {
 			// Function that's called for every drop finished
 			const resolveOne = () => {
 				insertsLeft--;
+				// Set quest as finished
 				if (insertsLeft === 0) {
 					currentQuest.finalLength = dropCount * quest.baseLength;
 					this.dbInterface.insertModel(currentQuest)
@@ -129,7 +130,11 @@ export default class Questing {
 		return this.completeGivenQuest(currentQuest);
 	}
 
-	async completeGivenQuest(currentQuest: QuestUser & BaseModelId): Promise<ContainerItem[]> {
+	/**
+	 * @param currentQuest QuestUser to get drop counts for
+	 * @returns [<drops if redeemed right now>, <maximum drops reachable>]
+	 */
+	async getCurrentDropCount(currentQuest: QuestUser & BaseModelId): Promise<{currentDrops: number, maxDrops: number}> {
 		// TODO: implement quest timeLimit (needs fetching of other QuestUser for the day)
 		const quest = await this.dbInterface.selectModelById(Quest, currentQuest.quest_id);
 		// Find how many drops were gotten before the day end
@@ -138,8 +143,18 @@ export default class Questing {
 			this.getNextDay(currentQuest.startTime).getTime()
 		));
 		const lapsed = Math.min(currentQuestEnd.getTime() - currentQuest.startTime.getTime(), BASE_TIME_LIMIT);
-		const dropCount = Math.floor(lapsed / quest.baseLength);
-		return await this.createDrops(currentQuest, dropCount, quest);
+		return {
+			currentDrops: Math.floor(lapsed / quest.baseLength),
+			maxDrops: Math.floor(BASE_TIME_LIMIT / quest.baseLength),
+		};
+	}
+
+	async completeGivenQuest(currentQuest: QuestUser & BaseModelId): Promise<ContainerItem[]> {
+		return await this.createDrops(
+			currentQuest,
+			(await this.getCurrentDropCount(currentQuest)).currentDrops,
+			await this.dbInterface.selectModelById(Quest, currentQuest.quest_id)
+		);
 	}
 
 	/**

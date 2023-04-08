@@ -35,15 +35,15 @@ export default function addRoutes(app: express.Express, dbInterface: DbInterface
 
 	app.post('/questing', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
 		const user: User & BaseModelId = res.locals.user;
-		const quest_id = req.body.quest_id;
-		if (typeof quest_id !== 'number') {
+		const questId = req.body.questId;
+		if (typeof questId !== 'number') {
 			res.status(400).json({
 				'message': 'Invalid request body',
 			});
 			return;
 		}
 		try {
-			const quest = await dbInterface.selectModelById(Quest, quest_id);
+			const quest = await dbInterface.selectModelById(Quest, questId);
 			await questing.startUserQuest(user, quest);
 			res.status(200).json({
 				'message': 'OK',

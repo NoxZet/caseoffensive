@@ -48,6 +48,12 @@ const App = () => {
 
 	useEffect(loadToken, []);
 
+	const axiosInstance = axios.create({
+		headers: {
+			authorization: localStorage.getItem(storageKeyToken) || undefined,
+		},
+	})
+
 	function displayError() {
 		if (currentError) {
 			return <div className="login-error">{currentError}</div>
@@ -100,7 +106,7 @@ const App = () => {
 			<div>Logged in as {loggedUser.username}</div>
 			{
 				// TODO: Add conditions for other screens
-				<QuestPage/>
+				<QuestPage axiosInstance={axiosInstance}/>
 			}
 		</div>
 	} else {

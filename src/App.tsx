@@ -6,6 +6,7 @@ import LoginForm from "components/LoginForm";
 import RegisterForm from "components/RegisterForm";
 import User from "resource/User";
 import QuestPage from "components/QuestPage";
+import InventoryPage from "components/InventoryPage";
 
 type Logged = false | User;
 const storageKeyToken = 'case_token';
@@ -103,10 +104,19 @@ const App = () => {
 	// TODO: Make 'checking' loader cover whole screen (so login form doesn't flash before changing to logged in screen)
 	if (loggedUser) {
 		return <div className="app">
-			<div>Logged in as {loggedUser.username}</div>
+			<div className="app-header-bar">
+				<div><a onClick={() => setCurrentScreen('quests')} href="#">Quests</a></div>
+				<div><a onClick={() => setCurrentScreen('containers')} href="#">Containers</a></div>
+				<div><a onClick={() => setCurrentScreen('skins')} href="#">Skins</a></div>
+				<div>{loggedUser.username}</div>
+			</div>
 			{
-				// TODO: Add conditions for other screens
-				<QuestPage axiosInstance={axiosInstance}/>
+				currentScreen === 'containers' ?
+					<InventoryPage axiosInstance={axiosInstance}/>
+				: currentScreen === 'skins' ?
+					<InventoryPage axiosInstance={axiosInstance}/>
+				:
+					<QuestPage axiosInstance={axiosInstance}/>
 			}
 		</div>
 	} else {

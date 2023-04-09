@@ -15,7 +15,7 @@ app.get('/inventory/container', security.getUserMiddleware, async function (req:
 	let page = Math.max(0, parseInt(req.query.page as any) || 0);
 	try {
 		const containers = await dbInterface.selectModel(ContainerItem,
-			'WHERE owner_id = $1 ORDER BY id ASC LIMIT 20 OFFSET $2',
+			'WHERE owner_id = $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2',
 			[user.id, page * 20]
 		)
 		res.status(200)
@@ -33,7 +33,7 @@ app.get('/inventory/skin', security.getUserMiddleware, async function (req: expr
 	let page = Math.max(0, parseInt(req.query.page as any) || 0);
 	try {
 		const containers = await dbInterface.selectModel(SkinItem,
-			'WHERE owner_id = $1 ORDER BY id ASC LIMIT 20 OFFSET $2',
+			'WHERE owner_id = $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2',
 			[user.id, page * 20]
 		)
 		res.status(200)

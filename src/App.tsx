@@ -112,9 +112,9 @@ const App = () => {
 			</div>
 			{
 				currentScreen === 'containers' ?
-					<InventoryPage axiosInstance={axiosInstance}/>
+					<InventoryPage axiosInstance={axiosInstance} type='container'/>
 				: currentScreen === 'skins' ?
-					<InventoryPage axiosInstance={axiosInstance}/>
+					<InventoryPage axiosInstance={axiosInstance} type='skin'/>
 				:
 					<QuestPage axiosInstance={axiosInstance}/>
 			}

@@ -1,10 +1,18 @@
-export type KnifeCollection = 'knife1Old' | 'knife1Chroma' | 'knife1Gamma'
-	| 'knifeHuntsmanOld' | 'knifeButterflyOld' | 'knifeFalchionOld' | 'knifeShadowsOld' | 'knifeBowieOld'
-	| 'knife2Chroma' | 'knife2Gamma'
-	| 'knife3Old' | 'knife3Chroma'
-	| 'knifeClassicOld' | 'knife4Old'
-export type GloveCollection = 'glove2' | 'glove3';
+export const knifeCollections = [
+	'knife1Old', 'knife1Chroma', 'knife1Gamma',
+	'knifeHuntsmanOld', 'knifeButterflyOld', 'knifeFalchionOld', 'knifeShadowsOld', 'knifeBowieOld',
+	'knife2Chroma', 'knife2Gamma',
+	'knife3Old', 'knife3Chroma',
+	'knifeClassicOld', 'knife4Old',
+] as const;
+export type KnifeCollection = typeof knifeCollections[number];
+
+export const gloveCollections = ['glove2', 'glove3'] as const;
+export type GloveCollection = typeof gloveCollections[number];
+
+export const specialCollections = [...knifeCollections, ...gloveCollections] as const;
 export type SpecialCollection = KnifeCollection | GloveCollection;
+
 export type Case = 'caseWeapon1' | 'caseWeapon2' | 'caseWeapon3' | 'caseBravo'
 	| 'caseEsports2013' | 'caseEsports2013Winter' | 'caseEsports2014Summer'
 	| 'caseWinterOffensive' | 'casePhoenix' | 'caseVanguard' | 'caseRevolver'

@@ -7,13 +7,29 @@ export type Weapon = 'cz75' | 'deagle' | 'duals' | '57' | 'glock18' | 'p2000' | 
   | 'talonk' | 'navajak' | 'stilettok' | 'ursusk'
   | 'classick' | 'nomadk' | 'paracordk' | 'skeletonk' | 'survivalk'
   | 'driverg' | 'handw' | 'hydrag' | 'motog' | 'specialg' | 'sportg' | 'fangg';
-export function getWeaponDisplayName(weapon: Weapon) {
+export function getWeaponDisplayName(weapon: Weapon): string {
   switch (weapon) {
     case 'cz75': return 'CZ75-Auto';
     case 'deagle': return 'Desert Eagle';
     case 'duals': return 'Dual Berettas';
     case '57': return 'Five-SeveN';
     case 'glock18': return 'Glock-18';
+    case 'p2000': return 'P2000';
+    case 'p250': return 'P250';
+    case 'r8': return 'R8 Revolver';
+    case 'tec9': return 'Tec-9';
+    case 'usps': return 'USP-S';
+    case 'ak47': return 'AK-47';
+    case 'aug': return 'AUG';
+    case 'awp': return 'AWP';
+    case 'famas': return 'FAMAS';
+    case 'g3sg1': return 'G3SG1';;
+    case 'galil': return 'Galil AR';
+    case 'm4a1s': return 'M4A1-S';
+    case 'm4a4': return 'M4A4';
+    case 'scar20': return 'SCAR-20';
+    case 'sg553': return 'SG 553';
+    case 'ssg08': return 'SSG 08';
     default: return weapon;
     //case '': return '';
   }
@@ -31,6 +47,18 @@ type SkinWear = SkinVanilla & {
 };
 export type Skin = SkinVanilla | SkinWear;
 import { ContainerCollection, SpecialCollection } from "opening/collectionRegister";
+
+export function getSkinData(weapon: Weapon, skin: string): [Skin, ContainerCollection | SpecialCollection] {
+  let collectionName: keyof typeof collections;
+  for (collectionName in collections) {
+    for (const currentSkin of collections[collectionName]) {
+      if (currentSkin.weapon === weapon && currentSkin.skin === skin) {
+        return [currentSkin, collectionName];
+      }
+    }
+  }
+  throw new Error('Invalid weapon - skin input');
+}
 
 export const collections: {[collName in (ContainerCollection | SpecialCollection)]: Skin[]} = {
 // Aug 2013 collections - all inactive since Nov 2013

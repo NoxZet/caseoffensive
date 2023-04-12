@@ -5,8 +5,9 @@ import Security, { InvalidCredentials } from 'server/Security';
 import { BaseModelId } from 'database/BaseModel';
 import ContainerItem from 'database/ContainerItem';
 import User from 'database/User';
-import { getDrops } from 'opening/dropGenerator';
+import { createDropTickets, getRandomDrops } from 'opening/dropGenerator';
 import SkinItem from 'database/SkinItem';
+import { TicketSkin } from 'resource/Skin';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security) {
 
@@ -46,6 +47,38 @@ app.get('/inventory/skin', security.getUserMiddleware, async function (req: expr
 	}
 });
 
+app.get('/inventory/container/:containerId([0-9]+)/drops', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
+	const user: User & BaseModelId = res.locals.user;
+	const containerId: number = parseInt(req.params.containerId);
+	try {
+		const containers = await dbInterface.selectModel(ContainerItem,
+			'WHERE owner_id = $1 AND id = $2',
+			[user.id, containerId]
+		);
+		//console.log(containers);
+		if (containers.length === 0) {
+			res.status(404).json({
+				'message': 'Invalid container'
+			});
+		} else {
+			const container = containers[0];
+			const { ticketArticles: ticketArticles, ticketSum: ticketSum } = createDropTickets(container, false);
+			const results: TicketSkin[] = [];
+			for (const article of ticketArticles) {
+				results.push({
+					chance: article.tickets / ticketSum,
+					item: article.skin === 'specialSet'
+						? {special: true as true, quality: article.quality, collection: article.collection}
+						: (new SkinItem(article.skin.weapon, article.skin.skin, article.quality, 0, container.level, [])).toResource()
+				});
+			}
+			res.status(200).json(results);
+		}
+	} catch (error) {
+		next(error);
+	}
+});
+
 app.post('/inventory/container/:containerId([0-9]+)/open', security.getUserMiddleware, async function (req: express.Request, res: express.Response, next: Function) {
 	const user: User & BaseModelId = res.locals.user;
 	const containerId: number = parseInt(req.params.containerId);
@@ -60,7 +93,7 @@ app.post('/inventory/container/:containerId([0-9]+)/open', security.getUserMiddl
 				'message': 'Invalid container'
 			});
 		} else {
-			const drops = getDrops(containers[0], 41);
+			const drops = getRandomDrops(containers[0], 41);
 			const final = drops.pop()!;
 			await dbInterface.deleteModel(containers[0]);
 			final.original_owner_id = user.id;

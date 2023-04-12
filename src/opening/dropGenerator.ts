@@ -203,14 +203,14 @@ function getRandomPrefix(container: ContainerItem): Prefix[] {
 	return prefixes;
 }
 
-export function getDrops(container: ContainerItem, count: number): SkinItem[] {
+export function getRandomDrops(container: ContainerItem, count: number): SkinItem[] {
 	const { ticketArticles: ticketArticles, ticketSum: ticketSum } = createDropTickets(container, true);
 	const results = [];
 	for (let i = 0; i < count; i++) {
 		const article = chooseArticle(ticketArticles, ticketSum);
 		const skin = article.skin;
 		if (skin === 'specialSet') {
-			throw new Error('Generated a skin with specialSet for getDrops');
+			throw new Error('Generated a skin with specialSet for getRandomDrops');
 		} else {
 			const wear = ('wearMin' in skin)
 				? Math.random() * (skin.wearMax - skin.wearMin) + skin.wearMin

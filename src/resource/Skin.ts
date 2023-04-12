@@ -1,5 +1,6 @@
 import { getPrefixesDisplayName, Prefix } from 'opening/prefixRegister';
 import { Weapon, Quality, getWeaponDisplayName } from 'opening/skinRegister'
+import { ItemCollection } from 'opening/collectionRegister';
 
 /**
  * Representation of Skin sent to frontend
@@ -16,6 +17,8 @@ type Skin = {
 	stattrak: number,
 }
 export default Skin;
+
+export type TicketSkin = {chance: number, item: Skin | {special: true, quality: Quality, collection: ItemCollection}};
 
 export function getSkinDisplayName(skin: Skin): [string, string] {
 	return [getPrefixesDisplayName(skin.prefix) + ' ' + getWeaponDisplayName(skin.weapon), skin.skin];

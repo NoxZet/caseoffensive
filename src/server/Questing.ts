@@ -96,6 +96,7 @@ export default class Questing {
 					cum += result.tickets;
 					if (ticket < cum) {
 						const container = new ContainerItem(result.collection, result.special);
+						container.baseSprite = result.baseSprite;
 						container.original_owner_id = currentQuest.user_id;
 						container.owner_id = currentQuest.user_id;
 						container.created_at = new Date();

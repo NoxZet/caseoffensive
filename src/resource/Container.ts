@@ -17,5 +17,6 @@ type Container = {
 	covertBoost: number,
 	// Increases the chance of special item
 	specialBoost: number,
+	baseSprite: string | undefined,
 };
 export default Container;

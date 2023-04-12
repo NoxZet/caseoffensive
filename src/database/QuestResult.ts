@@ -13,6 +13,7 @@ export default class QuestResult extends BaseModel {
 		{ name: 'collection', type: 'TEXT', injectConstructor: true },
 		{ name: 'special', type: 'TEXT', injectConstructor: true, nullable: true },
 		{ name: 'prefix', type: 'TEXT[]', injectConstructor: true },
+		{ name: 'baseSprite', type: 'TEXT', injectConstructor: true, nullable: true },
 	]);
 
 	constructor(
@@ -21,6 +22,7 @@ export default class QuestResult extends BaseModel {
 		public collection: ContainerCollection,
 		public special: SpecialCollection | undefined,
 		public prefix: Prefix[],
+		public baseSprite: string | undefined = undefined,
 	) {super();}
 
 	toContainerResource(): ContainerResource {
@@ -37,6 +39,7 @@ export default class QuestResult extends BaseModel {
 			sideChance: 0,
 			covertBoost: 0,
 			specialBoost: 0,
+			baseSprite: this.baseSprite,
 		};
 	}
 

@@ -17,6 +17,7 @@ export default class ContainerItem extends BaseItem {
 		{ name: 'sideChance', type: 'DOUBLE PRECISION', injectConstructor: true },
 		{ name: 'covertBoost', type: 'DOUBLE PRECISION', injectConstructor: true },
 		{ name: 'specialBoost', type: 'DOUBLE PRECISION', injectConstructor: true },
+		{ name: 'baseSprite', type: 'TEXT', injectConstructor: true, nullable: true },
 	]);
 
 	constructor(
@@ -33,6 +34,7 @@ export default class ContainerItem extends BaseItem {
 		public covertBoost: number = 0,
 		// Increases the chance of special item
 		public specialBoost: number = 0,
+		public baseSprite: string | undefined = undefined,
 	) {super();}
 
 	toResource(): ContainerResource {
@@ -49,6 +51,7 @@ export default class ContainerItem extends BaseItem {
 			sideChance: this.sideChance,
 			covertBoost: this.covertBoost,
 			specialBoost: this.specialBoost,
+			baseSprite: this.baseSprite,
 		};
 	}
 }

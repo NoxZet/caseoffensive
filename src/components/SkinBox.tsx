@@ -7,7 +7,7 @@ export default function SkinBox({skin: skinResource, hover} : {skin: SkinResourc
 	const imageLayers: JSX.Element[] = [];
 	// Get skin base image - need data from skin register
 	const [skinData, collectionName] = getSkinData(skinResource.weapon, skinResource.skin);
-	imageLayers.push(<img key='base' src={skinData.imgSrc}/>);
+	imageLayers.push(<img className='layer-base' key='base' src={skinData.imgSrc}/>);
 
 	const [weaponName, skinName] = getSkinDisplayName(skinResource);
 	return <div className={`item-box skin-box skin-quality-${skinData.quality}`}>

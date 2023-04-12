@@ -1,4 +1,3 @@
-import { getCollectionDisplayName } from 'opening/collectionRegister';
 import { getPrefixesDisplayName, Prefix } from 'opening/prefixRegister';
 import { Weapon, Quality, getWeaponDisplayName } from 'opening/skinRegister'
 

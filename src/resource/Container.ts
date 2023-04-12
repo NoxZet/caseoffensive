@@ -1,5 +1,5 @@
-import { ContainerCollection, SpecialCollection } from 'opening/collectionRegister'
-import { Prefix } from 'opening/prefixRegister';
+import { ContainerCollection, getCollectionContainerDisplayName, SpecialCollection } from 'opening/collectionRegister'
+import { getPrefixesDisplayName, Prefix } from 'opening/prefixRegister';
 
 type Container = {
 	id: number | undefined,
@@ -20,3 +20,8 @@ type Container = {
 	baseSprite: string | undefined,
 };
 export default Container;
+
+export function getContainerDisplayName(container: Container): string {
+	return getPrefixesDisplayName(container.prefix.filter(prefix => prefix !== 'stattrak' || !container.mainCollection.startsWith('case')))
+		+ ' ' + getCollectionContainerDisplayName(container.mainCollection);
+}

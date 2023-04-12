@@ -6,6 +6,7 @@ import SkinResource from 'resource/Skin';
 import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
 import SkinBox from './SkinBox';
+import ContainerBox from './ContainerBox';
 
 export default function InventoryPage({axiosInstance, type: inventoryType} : {axiosInstance: AxiosInstance, type: 'container' | 'skin'}) {
 	const [items, setItems] = useState<((SkinResource | ContainerResource) & HasId)[]>([]);
@@ -33,7 +34,7 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 				return <div key={item.id}>
 					{'skin' in item
 						? <SkinBox skin={item} hover={true}/>
-						: getCollectionContainerDisplayName(item.mainCollection)
+						: <ContainerBox container={item} hover={true}/>
 					}
 				</div>
 			})}

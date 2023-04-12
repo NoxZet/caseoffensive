@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import { Client } from 'pg';
 import errorHandler from 'server/errorHandler';
@@ -51,13 +52,16 @@ const questing = new Questing(dbInterface);
 
 const app = express();
 
-app.use(express.static('public'));
+app.use('/data', express.static('public'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 addUserRoutes(app, dbInterface, security);
 addInventoryRoutes(app, dbInterface, security);
 addQuestRoutes(app, dbInterface, security, questing);
+
+app.get('/data/*', (req, res) => res.status(404).json({}));
+app.get('/*', (req, res) => res.sendFile(path.resolve(__dirname + '/../public/index.html')));
 
 app.use((error: Error, req: express.Request, res: express.Response, next: Function) => {
 	errorHandler(error);

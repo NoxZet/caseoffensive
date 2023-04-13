@@ -7,11 +7,13 @@ import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
 import SkinBox from './SkinBox';
 import ContainerBox from './ContainerBox';
+import OpeningPage from './OpeningPage';
 
 export default function InventoryPage({axiosInstance, type: inventoryType} : {axiosInstance: AxiosInstance, type: 'container' | 'skin'}) {
 	const [items, setItems] = useState<((SkinResource | ContainerResource) & HasId)[]>([]);
 	const [page, setPage] = useState<number>(0);
 	const [loading, setLoading] = useState<boolean>(true);
+	const [opening, setOpening] = useState<(ContainerResource & HasId) | null>(null);
 
 	useEffect(() => {
 		setLoading(true);
@@ -28,20 +30,31 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 		}
 	}
 
-	return <div className='app-screen inventory-screen'>
-		<div className='item-list'>
-			{items.map(item => {
-				return <div key={item.id}>
-					{'skin' in item
-						? <SkinBox skin={item} hover={true}/>
-						: <ContainerBox container={item} hover={true}/>
-					}
-				</div>
-			})}
+	function openingClose() {
+		setOpening(null);
+		setPage(page);
+	}
+
+	return <>
+		<div className='app-screen inventory-screen'>
+			<div className='item-list' style={opening ? {display: 'none'} : {}}>
+				{items.map(item => {
+					return <div key={item.id}>
+						{'skin' in item
+							? <SkinBox skin={item} hover={true}/>
+							: <ContainerBox container={item} hover={true} onOpen={() => setOpening(item)}/>
+						}
+					</div>
+				})}
+			</div>
+			<div className='page-bar'>{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(page => {
+				return <a key={page} onClick={() => setPage(page)} href="#">{page + 1}</a>;
+			})}</div>
+			{displayLoader()}
 		</div>
-		<div className='page-bar'>{[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map(page => {
-			return <a key={page} onClick={() => setPage(page)} href="#">{page + 1}</a>;
-		})}</div>
-		displayLoader();
-	</div>;
+		{opening
+			? <OpeningPage axiosInstance={axiosInstance} container={opening} onClose={openingClose}/>
+			: null
+		}
+	</>;
 }

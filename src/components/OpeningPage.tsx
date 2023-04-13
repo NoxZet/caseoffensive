@@ -16,8 +16,8 @@ export default function OpeningPage({axiosInstance, container: containerResource
 	const [possibleDrops, setPossibleDrops] = useState<'loading' | TicketSkin[]>('loading');
 
 	useEffect(() => {
-		axiosInstance.get(`/inventory/container/${containerResource.id}`)
-		.then(response => setPossibleDrops(response.data));
+		axiosInstance.get(`/inventory/container/${containerResource.id}/drops`)
+		.then(response => {console.log(response.data); setPossibleDrops(response.data)});
 	}, []);
 
 	function openCase() {
@@ -26,13 +26,13 @@ export default function OpeningPage({axiosInstance, container: containerResource
 
 	const classes = 'app-screen opening-screen';
 	if (openingState === STATE_OVERVIEW) {
-		let renderDrops = null;
+		let renderDrops;
 		if (possibleDrops === 'loading') {
 			renderDrops = <div>Loading...</div>;
 		} else {
 			// We group items of the same chance together
 			const chanceGroups = [];
-			const currentGroup = [];
+			let currentGroup = [];
 			for (let i = 0; i < possibleDrops.length; i++) {
 				currentGroup.push(possibleDrops[i]);
 				// After a chance group ends (ie. last item or next item has different chance)
@@ -48,8 +48,10 @@ export default function OpeningPage({axiosInstance, container: containerResource
 						</div>
 					</div>
 					);
+					currentGroup = [];
 				}
 			}
+			renderDrops = chanceGroups;
 		}
 
 		return <div className={classes}>
@@ -60,8 +62,9 @@ export default function OpeningPage({axiosInstance, container: containerResource
 				</div>
 			</div>
 			<div className='possible-drops-bar'>
-
+				{renderDrops}
 			</div>
 		</div>
 	}
+	return null;
 }

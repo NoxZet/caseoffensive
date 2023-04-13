@@ -2,7 +2,7 @@ import { ContainerCollection, getCollectionDisplayName, specialCollections } fro
 import React from 'react'
 import ContainerResource, { getContainerDisplayName } from 'resource/Container';
 
-export default function ContainerBox({container: containerResource, hover} : {container: ContainerResource, hover?: boolean}) {
+export default function ContainerBox({container: containerResource, hover, onOpen: onOpen} : {container: ContainerResource, hover?: boolean, onOpen?: () => void}) {
 	const imageLayers: JSX.Element[] = [];
 	// Get skin base image - need data from skin register
 	const baseSrc = '/data/containers/' + (containerResource.baseSprite || containerResource.mainCollection) + '.png';
@@ -23,6 +23,10 @@ export default function ContainerBox({container: containerResource, hover} : {co
 		{hover
 			? <div className='item-hover'>
 			</div>
+			: null
+		}
+		{onOpen
+			? <div><a onClick={onOpen} href='#'>Open</a></div>
 			: null
 		}
 	</div>;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { AxiosInstance } from 'axios';
 
-import ContainerResource from 'resource/Container';
+import ContainerResource, { getContainerDisplayName } from 'resource/Container';
 import SkinResource, { TicketSkin } from 'resource/Skin';
 import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
@@ -14,14 +14,41 @@ export default function OpeningPage({axiosInstance, container: containerResource
 	const STATE_RESULT = 2;
 	const [openingState, setOpeningState] = useState<typeof STATE_OVERVIEW | typeof STATE_OPENING | typeof STATE_RESULT>(STATE_OVERVIEW);
 	const [possibleDrops, setPossibleDrops] = useState<'loading' | TicketSkin[]>('loading');
+	const [actualDrops, setActualDrops] = useState<'loading' | {final: SkinResource, alternative: SkinResource[]}>('loading');
+	const [randomOffset, setRandomOffset] = useState<number>(-10);
+	const [animationFinishedTimeout, setAnimationFinishedTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
 
 	useEffect(() => {
 		axiosInstance.get(`/inventory/container/${containerResource.id}/drops`)
-		.then(response => {console.log(response.data); setPossibleDrops(response.data)});
+		.then(response => {setPossibleDrops(response.data)});
+		return () => {
+			// Clear animation finish timeout so we don't set state on removed component
+			if (animationFinishedTimeout !== undefined) {
+				clearTimeout(animationFinishedTimeout);
+			}
+		}
 	}, []);
 
-	function openCase() {
+	function skipAnimation() {
+		if (animationFinishedTimeout !== undefined) {
+			clearTimeout(animationFinishedTimeout);
+		}
+		setOpeningState(STATE_RESULT);
+	}
 
+	function openCase() {
+		if (openingState === STATE_OVERVIEW) {
+			// Open the case on the server, set to animation state
+			setOpeningState(STATE_OPENING);
+			setRandomOffset(-10);
+			axiosInstance.post(`/inventory/container/${containerResource.id}/open`)
+			.then(response => {
+				setActualDrops(response.data)
+				setAnimationFinishedTimeout(setTimeout(() => {
+					setOpeningState(STATE_RESULT);
+				}, 7000));
+			});
+		}
 	}
 
 	const classes = 'app-screen opening-screen';
@@ -64,7 +91,34 @@ export default function OpeningPage({axiosInstance, container: containerResource
 			<div className='possible-drops-bar'>
 				{renderDrops}
 			</div>
-		</div>
+		</div>;
 	}
-	return null;
+	else if (openingState === STATE_OPENING) {
+		if (actualDrops === 'loading') {
+			return <div className={classes}><div>Loading...</div></div>;
+		} else {
+			return <div className={classes}>
+				<h2>Opening {getContainerDisplayName(containerResource)}...</h2>
+				<div className='opening-animation-frame'>
+					<div className='sliding-items' style={{marginLeft: `${randomOffset}px`}}>{
+						[...actualDrops.alternative.slice(0, -5), actualDrops.final, ...actualDrops.alternative.slice(-4)].map(drop => {
+							return <SkinBox skin={drop}/>;
+						})
+					}</div>
+					<div className='sliding-item-overlay-border'></div>
+					<div className='sliding-item-central-line'></div>
+				</div>
+				<div className='opening-bottom-bar'><a onClick={skipAnimation} href='#'>Skip animation</a></div>
+			</div>;
+		}
+	}
+	else { //if (openingState === STATE_RESULT) {
+		return <div className={classes}>
+			{actualDrops !== 'loading'
+				? <SkinBox skin={actualDrops.final}/>
+				: <div></div>
+			}
+			<div className='opening-bottom-bar'><a onClick={onClose} href='#'>Close</a></div>
+		</div>;
+	}
 }

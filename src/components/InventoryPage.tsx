@@ -15,11 +15,15 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 	const [loading, setLoading] = useState<boolean>(true);
 	const [opening, setOpening] = useState<(ContainerResource & HasId) | null>(null);
 
-	useEffect(() => {
+	function reloadPage() {
 		setLoading(true);
 		axiosInstance.get(`/inventory/${inventoryType}?page=${page}`)
 		.then(inventory => setItems(inventory.data))
 		.finally(() => setLoading(false));
+	}
+
+	useEffect(() => {
+		reloadPage();
 	}, [page]);
 
 	function displayLoader() {
@@ -32,7 +36,7 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 
 	function openingClose() {
 		setOpening(null);
-		setPage(page);
+		reloadPage();
 	}
 
 	return <>

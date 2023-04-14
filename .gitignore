@@ -1,3 +1,9 @@
 public/main_*.js*
 server/main_*.js*
+
+public/collections/*
+public/containers/*
+!public/collections/.gitkeep
+!public/containers/.gitkeep
+
 node_modules

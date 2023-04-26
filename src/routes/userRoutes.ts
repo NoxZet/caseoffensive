@@ -2,6 +2,7 @@ import express from 'express';
 import DbInterface, { NoResult } from 'database/DbInterface';
 import Security, { InvalidCredentials, InvalidToken } from 'server/Security';
 import User from 'database/User';
+import { USERNAME_PREDICATE, EMAIL_PREDICATE, PASSWORD_PREDICATE } from 'common/accountPredicates';
 
 export default function addRoutes(app: express.Express, dbInterface: DbInterface, security: Security) {
 
@@ -16,21 +17,22 @@ app.post('/user', async function (req: express.Request, res: express.Response, n
 		});
 		return;
 	}
-	if (!username.match(/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,19}$/)) {
+	let error: string | false;
+	if (error = USERNAME_PREDICATE(username)) {
 		res.status(422).json({
-			'message': 'Username must have 1-20 characters that are a-z, A-Z, 0-9, - or _, first character must not be - or _',
+			'message': error,
 		});
 		return;
 	}
-	if (!email.match(/^[^@]+@[^@]+\.[^@]+$/)) {
+	if (error = EMAIL_PREDICATE(email)) {
 		res.status(422).json({
-			'message': 'Invalid email address',
+			'message': error,
 		});
 		return;
 	}
-	if (password.length < 8 || !password.match(/[a-z]/) || !password.match(/[A-Z]/) || !password.match(/[0-9]/)) {
+	if (error = PASSWORD_PREDICATE(password)) {
 		res.status(422).json({
-			'message': 'Password must be at least 8 characters long and must contain one lowercase letter, one uppercase letter and one number',
+			'message': error,
 		});
 		return;
 	}

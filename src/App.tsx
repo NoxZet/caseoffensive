@@ -127,9 +127,12 @@ const App = () => {
 			</h1>
 			{displayError()}
 			{isRegister
-				? <RegisterForm onSubmitRegister={onSubmitRegister} onError={() => {}}/>
+				? <RegisterForm onSubmitRegister={onSubmitRegister} onError={(error) => setCurrentError(error)}/>
 				: <LoginForm onSubmitLogin={onSubmitLogin}/>
 			}
+			{isRegister
+				? <div><a onClick={() => setCurrentScreen('login')} href='#'>Already have an account?</a></div>
+				: <div><a onClick={() => setCurrentScreen('register')} href='#'>Create a new account</a></div>}
 			{displayLoader()}
 		</div>
 	}

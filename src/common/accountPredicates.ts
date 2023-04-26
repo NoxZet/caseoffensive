@@ -7,6 +7,6 @@ export const EMAIL_PREDICATE = function(email: string): string | false {
 		&& 'Invalid email address';
 };
 export const PASSWORD_PREDICATE = function(password: string): string | false {
-	return !(password.length < 8 && password.match(/[a-z]/) && password.match(/[A-Z]/) && password.match(/[0-9]/))
+	return !(password.length >= 8 && password.match(/[a-z]/) && password.match(/[A-Z]/) && password.match(/[0-9]/))
 		&& 'Password must be at least 8 characters long and must contain one lowercase letter, one uppercase letter and one number';
 };

@@ -72,6 +72,7 @@ const App = () => {
 	}
 
 	function onSubmitLogin(username: string, password: string): void {
+		setLoading(true);
 		axios.post('/session', {
 			username: username,
 			password: password,
@@ -97,8 +98,30 @@ const App = () => {
 	}
 
 	function onSubmitRegister(email: string, username: string, password: string) {
-		// TODO
-		console.log(email, username, password);
+		setLoading(true);
+		axios.post('/user', {
+			email: email,
+			username: username,
+			password: password,
+		})
+		.then(response => {
+			const token: string = response.data.message;
+			setCurrentError(response.data.message);
+			setCurrentScreen('login');
+		})
+		.catch(error => {
+			if (error.response) {
+				const response: AxiosResponse = error.response;
+				if (response.status === 422 || response.status === 409) {
+					setCurrentError(response.data.message);
+				}
+			} else {
+				console.error(error);
+			}
+		})
+		.finally(() => {
+			setLoading(false);
+		});
 	}
 
 	// TODO: Make 'checking' loader cover whole screen (so login form doesn't flash before changing to logged in screen)

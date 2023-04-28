@@ -1,0 +1,134 @@
+* {
+	--bg-color: #2c3740;
+}
+
+body {
+	background-color: var(--bg-color);
+	color: white;
+	font-family: Arial, Helvetica, sans-serif;
+}
+
+.app-header-bar {
+	min-height: 3em;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	column-gap: 2em;
+}
+
+.app-header-item {
+	font-size: 2em;
+}
+
+.app-header-user {
+	font-size: 2em;
+}
+
+.hover-target {
+	display: none;
+	position: absolute;
+	background-color: var(--bg-color);
+	z-index: 100;
+}
+
+.hover-parent:hover > .hover-target {
+	display: block;
+}
+
+.inventory-screen > .item-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	justify-content: center;
+}
+
+.inventory-screen > .item-list .item-box {
+	position: relative;
+}
+
+.inventory-screen > .item-list .item-box > .image-layers {
+	min-width: 342px;
+	max-width: 342px;
+	min-height: 256px;
+	max-height: 256px;
+	box-sizing: border-box;
+	overflow: hidden;
+	position: relative;
+
+	background: radial-gradient(circle at 50% 80%, rgba(210,210,210,1) 0%, rgba(94,94,94,1) 110%);
+	border: 2px solid #222;
+	border-bottom: 0;
+	border-radius: 1px 1px 0 0;
+}
+
+.inventory-screen > .item-list .item-box > .item-name {
+	min-width: 342px;
+	max-width: 342px;
+	box-sizing: border-box;
+
+	padding: 3px 2px 3px 10px;
+	text-shadow: 1px 1px #444;
+	font-size: 1.2em;
+
+	background: linear-gradient(90deg, rgb(145, 145, 145) 0%, rgba(145,145,145,1) 23%, rgba(89,89,89,1) 100%);
+	border: 2px solid #222;
+	border-top-width: 1px;
+	border-radius: 0 0 1px 1px;
+}
+
+.inventory-screen > .item-list .item-box.skin-quality-covert > .item-name {
+	background: linear-gradient(90deg, #eb4b4b 0%, #eb4b4b 23%, #621f1f 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-classified > .item-name {
+	background: linear-gradient(90deg, #d32ee6 0%, #d32ee6 23%, #64156d 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-restricted > .item-name {
+	background: linear-gradient(90deg, #8847ff 0%, #8847ff 23%, #321a5f 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-milspec > .item-name {
+	background: linear-gradient(90deg, #4b69ff 0%, #4b69ff 23%, #1b265e 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-industrial > .item-name {
+	background: linear-gradient(90deg, #5e98d9 0%, #5e98d9 23%, #263d58 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-consumer > .item-name {
+	background: linear-gradient(90deg, #9badc2 0%, #95a7bc 23%, #3f4853 100%);
+}
+.inventory-screen > .item-list .item-box.skin-quality-contraband > .item-name {
+	background: linear-gradient(90deg, #ffae39 0%, #ffae39 23%, #553912 100%);
+}
+
+.inventory-screen > .item-list .item-box .item-hover {
+	min-width: 342px;
+	max-width: 342px;
+	box-sizing: border-box;
+	position: absolute;
+	z-index: 100;
+	display: none;
+
+	border: 2px solid #4e647b;
+	background: linear-gradient(180deg, #1b3047 0%, #152536 100%);
+}
+
+.inventory-screen > .item-list .item-box .item-hover .item-name {
+	font-size: 1.5em;
+	padding-left: 3px;
+}
+
+.inventory-screen > .item-list .item-box:hover .item-hover {
+	display: block;
+}
+
+.inventory-screen > .item-list .item-box.container-box .image-layers .layer-base,
+.inventory-screen > .item-list .item-box.container-box .image-layers .layer-main-collection {
+	position: absolute;
+	height: 256px;
+	left: 0;
+	right: 0;
+	margin: auto;
+}
+
+.inventory-screen > .item-list .item-box.skin-box .image-layers .layer-base {
+	position: absolute;
+	height: 256px;
+}

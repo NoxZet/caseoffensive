@@ -124,14 +124,43 @@ const App = () => {
 		});
 	}
 
+	function logOut() {
+		const token = localStorage.getItem(storageKeyToken);
+		if (!token) {
+			return;
+		}
+		setLoading(true);
+		axios.delete('/session', {
+			data: {
+				token: token,
+			},
+		})
+		.then(response => {
+			setCurrentError('Logged out');
+			localStorage.removeItem(storageKeyToken)
+			setLoggedUser(false);
+		})
+		.catch(error => {
+			// TODO: handling
+		})
+		.finally(() => {
+			setLoading(false);
+		});
+	}
+
 	// TODO: Make 'checking' loader cover whole screen (so login form doesn't flash before changing to logged in screen)
 	if (loggedUser) {
-		return <div className="app">
-			<div className="app-header-bar">
-				<div><a onClick={() => setCurrentScreen('quests')} href="#">Quests</a></div>
-				<div><a onClick={() => setCurrentScreen('containers')} href="#">Containers</a></div>
-				<div><a onClick={() => setCurrentScreen('skins')} href="#">Skins</a></div>
-				<div>{loggedUser.username}</div>
+		return <div className='app'>
+			<div className='app-header-bar'>
+				<div className='app-header-item'><a onClick={() => setCurrentScreen('quests')} href="#">Quests</a></div>
+				<div className='app-header-item'><a onClick={() => setCurrentScreen('containers')} href="#">Containers</a></div>
+				<div className='app-header-item'><a onClick={() => setCurrentScreen('skins')} href="#">Skins</a></div>
+				<div className='app-header-user hover-parent'>
+					<div>{loggedUser.username}</div>
+					<div className='hover-target'>
+						<a onClick={() => logOut()} href="#">Log out</a>
+					</div>
+				</div>
 			</div>
 			{
 				currentScreen === 'containers' ?

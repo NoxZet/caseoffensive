@@ -22,11 +22,11 @@ export default function ContainerBox({container: containerResource, hover, onOpe
 		</div>
 		{hover
 			? <div className='item-hover'>
+				{onOpen
+					? <div><a onClick={onOpen} href='#'>Open</a></div>
+					: null
+				}
 			</div>
-			: null
-		}
-		{onOpen
-			? <div><a onClick={onOpen} href='#'>Open</a></div>
 			: null
 		}
 	</div>;

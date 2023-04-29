@@ -40,8 +40,8 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 	}
 
 	return <>
-		<div className='app-screen inventory-screen'>
-			<div className='item-list' style={opening ? {display: 'none'} : {}}>
+		<div className='app-screen inventory-screen' style={opening ? {display: 'none'} : {}}>
+			<div className='item-list'>
 				{items.map(item => {
 					return <div key={item.id}>
 						{'skin' in item

@@ -33,7 +33,7 @@ export function getWeaponDisplayName(weapon: Weapon): string {
     default: return weapon;
     //case '': return '';
   }
-}
+};
 export type Quality = 'contraband' | 'covert' | 'classified' | 'restricted' | 'milspec' | 'industrial' | 'consumer';
 type SkinVanilla = {
   weapon: Weapon,
@@ -41,6 +41,12 @@ type SkinVanilla = {
   quality: Quality,
   imgSrc: string,
 };
+export function getQualityDisplayName(quality: Quality) {
+  switch (quality) {
+    case 'milspec': return 'Mil-Spec';
+    default: return quality[0].toUpperCase() + quality.slice(1);
+  }
+}
 type SkinWear = SkinVanilla & {
   wearMin: number,
   wearMax: number,

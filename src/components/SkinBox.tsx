@@ -1,5 +1,5 @@
 import { ContainerCollection, getCollectionDisplayName, specialCollections } from 'opening/collectionRegister';
-import { getSkinData } from 'opening/skinRegister';
+import { getQualityDisplayName, getSkinData } from 'opening/skinRegister';
 import React from 'react'
 import SkinResource, { getExteriorDisplayName, getSkinDisplayName } from 'resource/Skin';
 
@@ -24,7 +24,7 @@ export default function SkinBox({skin: skinResource, hover} : {skin: SkinResourc
 					<tbody>
 						<tr>
 							<td>Rarity</td>
-							<td className='quality'></td>
+							<td className='quality'>{getQualityDisplayName(skinResource.quality)}</td>
 						</tr>
 						{'wearMin' in skinData ? <>
 							<tr>

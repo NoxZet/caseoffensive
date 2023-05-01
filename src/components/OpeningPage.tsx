@@ -15,7 +15,7 @@ export default function OpeningPage({axiosInstance, container: containerResource
 	const [openingState, setOpeningState] = useState<typeof STATE_OVERVIEW | typeof STATE_OPENING | typeof STATE_RESULT>(STATE_OVERVIEW);
 	const [possibleDrops, setPossibleDrops] = useState<'loading' | TicketSkin[]>('loading');
 	const [actualDrops, setActualDrops] = useState<'loading' | {final: SkinResource, alternative: SkinResource[]}>('loading');
-	const [randomOffset, setRandomOffset] = useState<number>(-10);
+	const [randomOffset, setRandomOffset] = useState<number>(-Math.floor(0)); // 0 to -338
 	const [animationFinishedTimeout, setAnimationFinishedTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
 
 	useEffect(() => {
@@ -40,13 +40,13 @@ export default function OpeningPage({axiosInstance, container: containerResource
 		if (openingState === STATE_OVERVIEW) {
 			// Open the case on the server, set to animation state
 			setOpeningState(STATE_OPENING);
-			setRandomOffset(-10);
+			setRandomOffset(-Math.floor(Math.random() * 339)); // 0 to -338
 			axiosInstance.post(`/inventory/container/${containerResource.id}/open`)
 			.then(response => {
 				setActualDrops(response.data)
 				setAnimationFinishedTimeout(setTimeout(() => {
 					setOpeningState(STATE_RESULT);
-				}, 7000));
+				}, 8100));
 			});
 		}
 	}
@@ -81,7 +81,7 @@ export default function OpeningPage({axiosInstance, container: containerResource
 			renderDrops = chanceGroups;
 		}
 
-		return <div className={classes}>
+		return <div className={classes + ' possible-drops-screen'}>
 			<div className='container-bar'>
 				<ContainerBox container={containerResource}/>
 				<div>
@@ -97,23 +97,25 @@ export default function OpeningPage({axiosInstance, container: containerResource
 		if (actualDrops === 'loading') {
 			return <div className={classes}><div>Loading...</div></div>;
 		} else {
-			return <div className={classes}>
+			return <div className={classes + ' opening-animation-screen'}>
 				<h2>Opening {getContainerDisplayName(containerResource)}...</h2>
-				<div className='opening-animation-frame'>
-					<div className='sliding-items' style={{marginLeft: `${randomOffset}px`}}>{
-						[...actualDrops.alternative.slice(0, -5), actualDrops.final, ...actualDrops.alternative.slice(-4)].map(drop => {
-							return <SkinBox skin={drop}/>;
-						})
-					}</div>
-					<div className='sliding-item-overlay-border'></div>
-					<div className='sliding-item-central-line'></div>
+				<div className='opening-animation-frame-wrapper'>
+					<div className='opening-animation-frame'>
+						<div className='sliding-items' style={{marginLeft: `${randomOffset}px`}}>{
+							[...actualDrops.alternative.slice(0, 35), actualDrops.final, ...actualDrops.alternative.slice(35)].map(drop => {
+								return <SkinBox skin={drop}/>;
+							})
+						}</div>
+						<div className='sliding-item-overlay-border'></div>
+						<div className='sliding-item-central-line'></div>
+					</div>
 				</div>
 				<div className='opening-bottom-bar'><a onClick={skipAnimation} href='#'>Skip animation</a></div>
 			</div>;
 		}
 	}
 	else { //if (openingState === STATE_RESULT) {
-		return <div className={classes}>
+		return <div className={classes + ' possible-drops-screen'}>
 			{actualDrops !== 'loading'
 				? <SkinBox skin={actualDrops.final}/>
 				: <div></div>

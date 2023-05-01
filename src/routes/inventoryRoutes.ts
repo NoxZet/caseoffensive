@@ -93,7 +93,7 @@ app.post('/inventory/container/:containerId([0-9]+)/open', security.getUserMiddl
 				'message': 'Invalid container'
 			});
 		} else {
-			const drops = getRandomDrops(containers[0], 41);
+			const drops = getRandomDrops(containers[0], 39);
 			const final = drops.pop()!;
 			await dbInterface.deleteModel(containers[0]);
 			final.original_owner_id = user.id;

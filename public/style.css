@@ -150,7 +150,7 @@ th, td {
 	height: 256px;
 }
 
-.opening-screen {
+.opening-screen.possible-drops-screen {
 	display: flex;
 	gap: 20px;
 }
@@ -159,4 +159,89 @@ th, td {
 	display: flex;
 	flex-wrap: wrap;
 	gap: 10px;
+}
+
+.opening-animation-screen > h2 {
+	text-align: center;
+}
+
+.opening-animation-frame-wrapper {
+	overflow: hidden;
+	width: 1050px;
+	margin: auto;
+}
+
+.opening-animation-frame {
+	overflow: hidden;
+	width: 1050px;
+	position: relative;
+}
+
+.opening-bottom-bar {
+	text-align: center;
+	margin-top: 20px;
+}
+
+@media (max-width: 1080px) {
+	.opening-animation-frame {
+		transform: scale(0.8) translateY(-13%);
+		margin-left: -105px; /* 10% of width */
+	}
+	.opening-animation-frame-wrapper {
+		width: 840px;
+		height: 254px;
+	}
+	.opening-animation-frame .item-box .item-name {
+		font-size: 1.4em;
+	}
+}
+
+@media (max-width: 860px) {
+	.opening-animation-frame {
+		transform: scale(0.6) translateY(-26%);
+		margin-left: -210px; /* 20% of width */
+	}
+	.opening-animation-frame-wrapper {
+		width: 630px;
+		height: 195px;
+	}
+	.opening-animation-frame .item-box .item-name {
+		font-size: 1.6em;
+	}
+}
+
+.sliding-items {
+	display: flex;
+	gap: 8px;
+	padding-right: 10px;
+}
+
+/* -12427 = 37 <number of alternate items> * 350 <item frame + gap width> - (350 * 3) / 2 <center of animation view window> - 2 (border) */
+@keyframes item-row-sliding {
+	0%   {margin-left: 0px; animation-timing-function: cubic-bezier(.09,.58,0,.95);}
+	91%  {margin-left: calc(var(--max-margin)*0.9969); animation-timing-function: linear;}
+	98%  {margin-left: calc(var(--max-margin)*0.9996); animation-timing-function: linear;}
+	100% {margin-left: calc(var(--max-margin)*1.00);}
+}
+
+.sliding-items .item-box:nth-child(1) {
+	--max-margin: -11727px;
+	animation-duration: 7.3s;
+	animation-name: item-row-sliding;
+	animation-fill-mode: forwards;
+}
+
+.sliding-item-central-line {
+	position: absolute;
+	left: 524px;
+	top: -20px;
+	width: 2px;
+	height: 350px;
+	background: orange;
+	background-clip: padding-box;
+	border: 10px solid;
+	border-image: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0) 100%);
+	border-image-slice: 8;
+	border-width: 8px;
+	border-style: solid;
 }

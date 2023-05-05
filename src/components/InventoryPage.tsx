@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { AxiosInstance } from 'axios';
+import { AxiosInstanceAuthError } from 'common/makeAxiosAuthError';
 
 import ContainerResource from 'resource/Container';
 import SkinResource from 'resource/Skin';
@@ -9,7 +9,7 @@ import SkinBox from './SkinBox';
 import ContainerBox from './ContainerBox';
 import OpeningPage from './OpeningPage';
 
-export default function InventoryPage({axiosInstance, type: inventoryType} : {axiosInstance: AxiosInstance, type: 'container' | 'skin'}) {
+export default function InventoryPage({axiosInstance, type: inventoryType} : {axiosInstance: AxiosInstanceAuthError, type: 'container' | 'skin'}) {
 	const [items, setItems] = useState<((SkinResource | ContainerResource) & HasId)[]>([]);
 	const [page, setPage] = useState<number>(0);
 	const [loading, setLoading] = useState<boolean>(true);
@@ -19,6 +19,7 @@ export default function InventoryPage({axiosInstance, type: inventoryType} : {ax
 		setLoading(true);
 		axiosInstance.get(`/inventory/${inventoryType}?page=${page}`)
 		.then(inventory => setItems(inventory.data))
+		.catch((error) => axiosInstance.authErrorCheck(error))
 		.finally(() => setLoading(false));
 	}
 

@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { AxiosInstance } from 'axios';
+import { AxiosInstanceAuthError } from 'common/makeAxiosAuthError';
 
 import QuestResource from 'resource/Quest';
 import QuestingResource from 'resource/Questing';
 import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
 
-export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstance}) {
+export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstanceAuthError}) {
 	const [quests, setQuests] = useState<(QuestResource & HasId)[]>([]);
 	const [openQuestId, setOpenQuestId] = useState<number | null>(null);
 	const [inProgressQuest, setInProgressQuest] = useState<QuestingResource | null>(null);
@@ -16,12 +16,14 @@ export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstanc
 		axiosInstance.get('/quest')
 		.then(response => {
 			setQuests(response.data);
-		});
+		})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 		// Fetch quest currently in progress
 		axiosInstance.get('/questing')
 		.then(response => {
 			setInProgressQuest(response.data.length === 0 ? null : response.data[0])
-		});
+		})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 	};
 
 	useEffect(reloadQuests, []);
@@ -52,7 +54,7 @@ export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstanc
 }
 
 function QuestDetails({quest, inProgressQuest, reloadQuests, axiosInstance} : {
-	quest: QuestResource & HasId, inProgressQuest: QuestingResource | null, reloadQuests: () => any, axiosInstance: AxiosInstance
+	quest: QuestResource & HasId, inProgressQuest: QuestingResource | null, reloadQuests: () => any, axiosInstance: AxiosInstanceAuthError
 }) {
 	// Sum the number of tickets in results to calculate chances of each result
 	const resultTickets = quest.results.reduce((cum, result) => cum + result.tickets, 0) || 0;
@@ -70,7 +72,7 @@ function QuestDetails({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 }
 
 function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
-	quest: QuestResource & HasId, inProgressQuest: QuestingResource | null, reloadQuests: () => any, axiosInstance: AxiosInstance
+	quest: QuestResource & HasId, inProgressQuest: QuestingResource | null, reloadQuests: () => any, axiosInstance: AxiosInstanceAuthError
 }) {
 	// TODO important: Pass an object down from App component for making requests with handling of token and unauthorized
 	const token = localStorage.getItem('case_token');
@@ -81,21 +83,24 @@ function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 		})
 		.then(response => {
 			reloadQuests();
-		});
+		})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 	}
 
 	function cancelQuest() {
 		axiosInstance.delete('/questing')
 		.then(response => {
 			reloadQuests();
-		});
+		})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 	};
 
 	function completeQuest() {
 		axiosInstance.post('/questing/complete')
 		.then(response => {
 			reloadQuests();
-		});
+		})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 	};
 
 	if (inProgressQuest === null) {

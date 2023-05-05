@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { AxiosInstance } from 'axios';
+import { AxiosInstanceAuthError } from 'common/makeAxiosAuthError';
 
 import ContainerResource, { getContainerDisplayName } from 'resource/Container';
 import SkinResource, { TicketSkin } from 'resource/Skin';
@@ -8,7 +8,7 @@ import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
 import SkinBox from './SkinBox';
 import ContainerBox from './ContainerBox';
 
-export default function OpeningPage({axiosInstance, container: containerResource, onClose} : {axiosInstance: AxiosInstance, container: ContainerResource & HasId, onClose: () => void}) {
+export default function OpeningPage({axiosInstance, container: containerResource, onClose} : {axiosInstance: AxiosInstanceAuthError, container: ContainerResource & HasId, onClose: () => void}) {
 	const STATE_OVERVIEW = 0;
 	const STATE_OPENING = 1;
 	const STATE_RESULT = 2;
@@ -20,7 +20,8 @@ export default function OpeningPage({axiosInstance, container: containerResource
 
 	useEffect(() => {
 		axiosInstance.get(`/inventory/container/${containerResource.id}/drops`)
-		.then(response => {setPossibleDrops(response.data)});
+		.then(response => {setPossibleDrops(response.data)})
+		.catch((error) => axiosInstance.authErrorCheck(error));
 		return () => {
 			// Clear animation finish timeout so we don't set state on removed component
 			if (animationFinishedTimeout !== undefined) {
@@ -47,7 +48,8 @@ export default function OpeningPage({axiosInstance, container: containerResource
 				setAnimationFinishedTimeout(setTimeout(() => {
 					setOpeningState(STATE_RESULT);
 				}, 8100));
-			});
+			})
+			.catch((error) => axiosInstance.authErrorCheck(error));
 		}
 	}
 

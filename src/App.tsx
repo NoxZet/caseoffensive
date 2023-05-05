@@ -7,6 +7,7 @@ import RegisterForm from "components/RegisterForm";
 import User from "resource/User";
 import QuestPage from "components/QuestPage";
 import InventoryPage from "components/InventoryPage";
+import makeAxiosAuthError from "common/makeAxiosAuthError";
 
 type Logged = false | User;
 const storageKeyToken = 'case_token';
@@ -49,11 +50,9 @@ const App = () => {
 
 	useEffect(loadToken, []);
 
-	const axiosInstance = axios.create({
-		headers: {
-			authorization: localStorage.getItem(storageKeyToken) || undefined,
-		},
-	})
+	const axiosInstance = makeAxiosAuthError(localStorage.getItem(storageKeyToken) || undefined, function() {
+		logOut('Login expired');
+	});
 
 	function displayError() {
 		if (currentError) {
@@ -124,7 +123,7 @@ const App = () => {
 		});
 	}
 
-	function logOut() {
+	function logOut(message: string = 'Logged out') {
 		const token = localStorage.getItem(storageKeyToken);
 		if (!token) {
 			return;
@@ -136,7 +135,7 @@ const App = () => {
 			},
 		})
 		.then(response => {
-			setCurrentError('Logged out');
+			setCurrentError(message);
 			localStorage.removeItem(storageKeyToken)
 			setLoggedUser(false);
 		})

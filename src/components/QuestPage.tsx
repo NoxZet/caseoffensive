@@ -74,9 +74,6 @@ function QuestDetails({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 	quest: QuestResource & HasId, inProgressQuest: QuestingResource | null, reloadQuests: () => any, axiosInstance: AxiosInstanceAuthError
 }) {
-	// TODO important: Pass an object down from App component for making requests with handling of token and unauthorized
-	const token = localStorage.getItem('case_token');
-
 	function startQuest() {
 		axiosInstance.post('/questing', {
 			questId: quest.id,
@@ -109,7 +106,7 @@ function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 		</div>;
 	} else if (inProgressQuest.questId === quest.id) {
 		return <div className='quest-progress'>
-			<div>{inProgressQuest.currentDrops} / {inProgressQuest.maxDrops}</div>
+			<QuestProgressBar questing={inProgressQuest}/>
 			<a href="#" onClick={cancelQuest}>Cancel</a> | <a href="#" onClick={completeQuest}>Finish</a>
 		</div>;
 	} else {
@@ -117,4 +114,54 @@ function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 			Already on a different quest
 		</div>;
 	}
+}
+
+function QuestProgressBar({questing: inputQuesting} : {questing: QuestingResource}) {
+	const [currentQuesting, setCurrentQuesting] = useState(inputQuesting);
+	const [progressTimeout, setProgressTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
+
+	useEffect(() => {
+		doProgressTimeout();
+		return () => {
+			// Clear animation finish timeout so we don't set state on removed component
+			if (progressTimeout !== undefined) {
+				clearTimeout(progressTimeout);
+			}
+		}
+	}, []);
+
+	// Progresses questing variable
+	// - if we reached the time of next drop, increments number of drops
+	// - if we haven't reached the maximum number of drops, sets timeout for the next drop (recursive)
+	function doProgressTimeout() {
+		// currentQuesting is the initial value here (reference doesn't update between calls), but it's fine because we update it to correct value with multiple whiles
+		if (currentQuesting.currentDrops < currentQuesting.maxDrops) {
+			const newQuesting = Object.assign({}, currentQuesting);
+			while ((new Date).getTime() >= newQuesting.nextDrop) {
+				newQuesting.currentDrops++;
+				newQuesting.nextDrop += newQuesting.questLength;
+				setCurrentQuesting(newQuesting);
+			}
+			if (newQuesting.currentDrops < newQuesting.maxDrops) {
+				setProgressTimeout(setTimeout(doProgressTimeout, newQuesting.nextDrop - (new Date).getTime()));
+			}
+		}
+	}
+
+	const currentProgress = 1 - (currentQuesting.nextDrop - (new Date).getTime()) / currentQuesting.questLength;
+
+	// TODO: The animation doesn't update properly when page is unfocused
+	// Need to investigate more but I think timeout is called correctly for rerendering but animation doesn't start until refocused
+	return <div className='quest-bar-frame'>
+		<div className='quest-bar-number'>{`${currentQuesting.currentDrops} / ${currentQuesting.maxDrops}`}</div>
+		<div className='quest-bar-loader-frame' key={`${currentQuesting.questId}-${currentQuesting.currentDrops}`}>
+			{currentQuesting.currentDrops < currentQuesting.maxDrops
+				? <div className='quest-bar-loader-bar' style={{
+					['--starting-progress' as any]: currentProgress,
+					['--progress-duration' as any]: (1 - currentProgress) * currentQuesting.questLength + 'ms',
+				}}></div>
+				: <div className='quest-bar-loader-bar quest-bar-loader-done'></div>
+			}
+		</div>
+	</div>;
 }

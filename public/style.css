@@ -1,5 +1,6 @@
 * {
 	--bg-color: #263039;
+	--max-quest-bar-width: 200px;
 }
 
 body {
@@ -46,6 +47,37 @@ th, td {
 
 .hover-parent:hover > .hover-target {
 	display: block;
+}
+
+.quest-bar-loader-frame {
+	border: solid black 2px;
+	width: var(--max-quest-bar-width);
+	height: 40px;
+}
+.quest-bar-loader-bar {
+	background: repeating-linear-gradient(
+		-60deg,
+		black,
+		black 10px,
+		#4479a9 10px,
+		#4479a9 20px
+	);
+	background-size: 11000px 100px;
+	height: 40px;
+}
+@keyframes shift-background {
+	from {background-position: -10000px 0;}
+	to   {background-position: 0 0;}
+}
+@keyframes questing-progress {
+	from {width: calc(var(--starting-progress) * var(--max-quest-bar-width));}
+	to   {width: var(--max-quest-bar-width);}
+}
+.quest-bar-loader-bar:not(.quest-bar-loader-done) {
+	animation: questing-progress var(--progress-duration) linear 0s 1 forwards, shift-background 1000s linear;
+}
+.quest-bar-loader-bar.quest-bar-loader-done {
+	width: var(--max-quest-bar-width);
 }
 
 .inventory-screen > .item-list {

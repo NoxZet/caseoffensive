@@ -7,6 +7,7 @@ import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
 import SkinBox from './SkinBox';
 import ContainerBox from './ContainerBox';
+import groupByChance from 'common/groupByChance';
 
 export default function OpeningPage({axiosInstance, container: containerResource, onClose} : {axiosInstance: AxiosInstanceAuthError, container: ContainerResource & HasId, onClose: () => void}) {
 	const STATE_OVERVIEW = 0;
@@ -55,32 +56,21 @@ export default function OpeningPage({axiosInstance, container: containerResource
 
 	const classes = 'app-screen opening-screen';
 	if (openingState === STATE_OVERVIEW) {
-		let renderDrops;
+		let renderDrops : JSX.Element | JSX.Element[];
 		if (possibleDrops === 'loading') {
 			renderDrops = <div>Loading...</div>;
 		} else {
-			// We group items of the same chance together
-			const chanceGroups = [];
-			let currentGroup = [];
-			for (let i = 0; i < possibleDrops.length; i++) {
-				currentGroup.push(possibleDrops[i]);
-				// After a chance group ends (ie. last item or next item has different chance)
-				if (i + 1 >= possibleDrops.length || possibleDrops[i].chance !== possibleDrops[i + 1].chance) {
-					// Render whole group here
-					chanceGroups.push(
-					<div className='chance-group'>
-						<h2>{Math.round(possibleDrops[i].chance * 1000000) / 10000}%</h2>
-						<div className='drop-list'>
-							{currentGroup.map(ticketItem => 'special' in ticketItem.item
-								? <div>Rare special item</div>
-								: <SkinBox skin={ticketItem.item}/>)}
-						</div>
+			// Display drops grouped by drop chance
+			renderDrops = groupByChance(possibleDrops, drop => drop.chance).map(({chance, drops}) =>
+				<div className='chance-group'>
+					<h2>{Math.round(chance * 1000000) / 10000}% each</h2>
+					<div className='drop-list'>
+						{drops.map(ticketItem => 'special' in ticketItem.item
+							? <div>Rare special item</div> /* TODO: Render rare special item */
+							: <SkinBox skin={ticketItem.item}/>)}
 					</div>
-					);
-					currentGroup = [];
-				}
-			}
-			renderDrops = chanceGroups;
+				</div>
+			);
 		}
 
 		return <div className={classes + ' possible-drops-screen'}>

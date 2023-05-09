@@ -1,6 +1,6 @@
 * {
 	--bg-color: #263039;
-	--max-quest-bar-width: 200px;
+	--max-quest-bar-width: 150px;
 }
 
 body {
@@ -49,21 +49,63 @@ th, td {
 	display: block;
 }
 
+.quest-screen {
+	display: flex;
+	gap: 10px;
+	margin-top: 0.5em;
+}
+.quest-screen .quest-details {
+	flex-grow: 1;
+}
+.quest-list-bar {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5em;
+	min-width: calc(var(--max-quest-bar-width) + 4.5em);
+}
+.quest-list-bar .quest-title {
+	font-size: 1.5em;
+	font-weight: bold;
+}
+.quest-list-item {
+	cursor: pointer;
+}
+.quest-details .quest-title {
+	font-size: 2em;
+	font-weight: bold;
+	margin-bottom: 0.7em;
+}
+.quest-details .quest-progress {
+	height: calc(26px + 1.5em);
+}
+.quest-details h2 {
+	margin-bottom: 0.3em;
+}
+.quest-details .chance-group:first-child h2 {
+	margin-top: 0;
+}
+
+.quest-bar-frame {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+.quest-bar-loader-frame, .quest-bar-loader-bar {
+	height: 22px;
+}
 .quest-bar-loader-frame {
 	border: solid black 2px;
 	width: var(--max-quest-bar-width);
-	height: 40px;
 }
 .quest-bar-loader-bar {
 	background: repeating-linear-gradient(
 		-60deg,
 		black,
-		black 10px,
-		#4479a9 10px,
-		#4479a9 20px
+		black 8px,
+		#4479a9 8px,
+		#4479a9 16px
 	);
 	background-size: 11000px 100px;
-	height: 40px;
 }
 @keyframes shift-background {
 	from {background-position: -10000px 0;}

@@ -5,6 +5,8 @@ import QuestResource from 'resource/Quest';
 import QuestingResource from 'resource/Questing';
 import HasId from 'resource/HasId';
 import { getCollectionContainerDisplayName } from 'opening/collectionRegister';
+import groupByChance from 'common/groupByChance';
+import ContainerBox from './ContainerBox';
 
 export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstanceAuthError}) {
 	const [quests, setQuests] = useState<(QuestResource & HasId)[]>([]);
@@ -39,11 +41,17 @@ export default function QuestPage({axiosInstance} : {axiosInstance: AxiosInstanc
 				const className = 'quest-list-item' + (isOpen ? ' quest-open' : '') + (isInProgress ? ' quest-in-progress' : '');
 				return <div key={quest.id} onClick={() => setOpenQuestId(quest.id)} className={className}>
 					<div className='quest-title'>{quest.name}</div>
-					<div className='quest-progress'>{isInProgress ? `${inProgressQuest.currentDrops} / ${inProgressQuest.maxDrops}` : 'Available'}</div>
+					{ isInProgress
+						? <div className='quest-progress'>
+							<QuestProgressBar questing={inProgressQuest}/>
+						</div>
+						: <div className='quest-progress'>
+							Available
+						</div>
+					}
 				</div>;
 			})}
 		</div>
-		<hr/>
 		<div className='quest-details'>
 			{openQuest
 				? <QuestDetails quest={openQuest} inProgressQuest={inProgressQuest} reloadQuests={reloadQuests} axiosInstance={axiosInstance}/>
@@ -59,15 +67,23 @@ function QuestDetails({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 	// Sum the number of tickets in results to calculate chances of each result
 	const resultTickets = quest.results.reduce((cum, result) => cum + result.tickets, 0) || 0;
 
+	// Copy results to order for grouping by ticket count
+	const renderDrops = groupByChance(quest.results.slice().sort((a, b) => a.tickets - b.tickets), drop => drop.tickets).map(({chance: tickets, drops}) =>
+		<div className='chance-group'>
+			<h2>{Math.round(tickets / resultTickets * 10000) / 100}% each</h2>
+			<div className='drop-list'>
+				{drops.map(container =>
+					<ContainerBox container={container.container}/>
+				)}
+			</div>
+		</div>
+	);
+
 	return <>
 		<div className='quest-title'>{quest.name}</div>
-		<div className='quest-drop-list-header'>Drops:</div>
-		<ul>{quest.results.map(result => {
-			return <li key={result.container.mainCollection}>
-				{getCollectionContainerDisplayName(result.container.mainCollection)} - {Math.round(result.tickets / resultTickets * 10000) / 100}%
-			</li>;
-		})}</ul>
 		<QuestProgress quest={quest} inProgressQuest={inProgressQuest} reloadQuests={reloadQuests} axiosInstance={axiosInstance}/>
+		<h2 className='quest-drop-list-header'>Drops</h2>
+		{renderDrops}
 	</>;
 }
 
@@ -117,6 +133,7 @@ function QuestProgress({quest, inProgressQuest, reloadQuests, axiosInstance} : {
 }
 
 function QuestProgressBar({questing: inputQuesting} : {questing: QuestingResource}) {
+	const [currentProgress, setCurrentProgress] = useState(0);
 	const [currentQuesting, setCurrentQuesting] = useState(inputQuesting);
 	const [progressTimeout, setProgressTimeout] = useState<NodeJS.Timeout | undefined>(undefined);
 
@@ -129,6 +146,9 @@ function QuestProgressBar({questing: inputQuesting} : {questing: QuestingResourc
 			}
 		}
 	}, []);
+	useEffect(() => {
+		setCurrentProgress(1 - (currentQuesting.nextDrop - (new Date).getTime()) / currentQuesting.questLength);
+	}, [currentQuesting]);
 
 	// Progresses questing variable
 	// - if we reached the time of next drop, increments number of drops
@@ -148,12 +168,9 @@ function QuestProgressBar({questing: inputQuesting} : {questing: QuestingResourc
 		}
 	}
 
-	const currentProgress = 1 - (currentQuesting.nextDrop - (new Date).getTime()) / currentQuesting.questLength;
-
 	// TODO: The animation doesn't update properly when page is unfocused
 	// Need to investigate more but I think timeout is called correctly for rerendering but animation doesn't start until refocused
 	return <div className='quest-bar-frame'>
-		<div className='quest-bar-number'>{`${currentQuesting.currentDrops} / ${currentQuesting.maxDrops}`}</div>
 		<div className='quest-bar-loader-frame' key={`${currentQuesting.questId}-${currentQuesting.currentDrops}`}>
 			{currentQuesting.currentDrops < currentQuesting.maxDrops
 				? <div className='quest-bar-loader-bar' style={{
@@ -163,5 +180,6 @@ function QuestProgressBar({questing: inputQuesting} : {questing: QuestingResourc
 				: <div className='quest-bar-loader-bar quest-bar-loader-done'></div>
 			}
 		</div>
+		<div className='quest-bar-number'>{`${currentQuesting.currentDrops} / ${currentQuesting.maxDrops}`}</div>
 	</div>;
 }

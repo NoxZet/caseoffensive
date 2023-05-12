@@ -107,7 +107,7 @@ export default function OpeningPage({axiosInstance, container: containerResource
 		}
 	}
 	else { //if (openingState === STATE_RESULT) {
-		return <div className={classes + ' possible-drops-screen'}>
+		return <div className={classes + ' final-drop-screen'}>
 			{actualDrops !== 'loading'
 				? <SkinBox skin={actualDrops.final}/>
 				: <div></div>

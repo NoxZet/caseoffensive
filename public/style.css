@@ -24,6 +24,7 @@ th, td {
 
 .app-header-bar {
 	min-height: 3em;
+	margin-bottom: 0.5em;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -228,6 +229,12 @@ th, td {
 	display: flex;
 	gap: 20px;
 }
+.possible-drops-bar .chance-group:first-child h2 {
+	margin-top: 0;
+}
+.possible-drops-bar h2 {
+	margin-bottom: 0.3em;
+}
 
 .chance-group .drop-list {
 	display: flex;
@@ -318,4 +325,17 @@ th, td {
 	border-image-slice: 8;
 	border-width: 8px;
 	border-style: solid;
+}
+
+.chance-group .drop-list {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.final-drop-screen {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
 }

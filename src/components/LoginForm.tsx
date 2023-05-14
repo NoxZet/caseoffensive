@@ -10,19 +10,19 @@ export default function LoginForm({ onSubmitLogin } : {
 		onSubmitLogin(username, password);
 	}
 
-	return <table>
-		<tbody>
-			<tr>
-				<td>Username</td>
-				<td><input type="text" value={username} onChange={elem => setUsername(elem.target.value)}/></td>
-			</tr>
-			<tr>
-				<td>Password</td>
-				<td><input type="password" value={password} onChange={elem => setPassword(elem.target.value)}/></td>
-			</tr>
-			<tr>
-				<td colSpan={2}><button onClick={submit}>Login</button></td>
-			</tr>
-		</tbody>
-	</table>;
+	return <form onSubmit={submit}>
+		<div>
+			<div className='form-field'>
+				<div className='form-field-header'>Username</div>
+				<div className='form-field-input'><input type='text' value={username} onChange={elem => setUsername(elem.target.value)}/></div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-header'>Password</div>
+				<div className='form-field-input'><input type='password' value={password} onChange={elem => setPassword(elem.target.value)}/></div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-input'><button type='submit'>Login</button></div>
+			</div>
+		</div>
+	</form>;
 }

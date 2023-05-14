@@ -62,31 +62,39 @@ export default function RegisterForm({ onSubmitRegister, onError } : {
 		}
 	}
 
-	return <table>
-		<tbody>
-			<tr>
-				<td>Email</td>
-				<td><input type="text" value={email} onChange={elem => setEmail(elem.target.value)}/></td>
-				<td>{emailError && <FieldError error={emailError}/>}</td>
-			</tr>
-			<tr>
-				<td>Username</td>
-				<td><input type="text" value={username} onChange={elem => usernameChange(elem.target.value)}/></td>
-				<td>{usernameError && <FieldError error={usernameError}/>}</td>
-			</tr>
-			<tr>
-				<td>Password</td>
-				<td><input type="password" value={password} onChange={elem => passwordChange(elem.target.value)}/></td>
-				<td>{passwordError && <FieldError error={passwordError}/>}</td>
-			</tr>
-			<tr>
-				<td>Repeat password</td>
-				<td><input type="password" value={password2} onChange={elem => password2Change(elem.target.value)}/></td>
-				<td>{password2Error && <FieldError error={password2Error}/>}</td>
-			</tr>
-			<tr>
-				<td colSpan={3}><button onClick={submit}>Register</button></td>
-			</tr>
-		</tbody>
-	</table>;
+	return <form onSubmit={submit} autoComplete='off'>
+		<div>
+			<div className='form-field'>
+				<div className='form-field-header'>Email</div>
+				<div className={'form-field-input ' + (emailError ? 'errored' : '')}>
+					<input type='text' value={email} onChange={elem => setEmail(elem.target.value)} />
+					<div className='form-field-error'>{emailError && <FieldError error={emailError} />}</div>
+				</div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-header'>Username</div>
+				<div className={'form-field-input ' + (usernameError ? 'errored' : '')}>
+					<input type='text' value={username} onChange={elem => usernameChange(elem.target.value)} />
+					<div className='form-field-error'>{usernameError && <FieldError error={usernameError} />}</div>
+				</div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-header'>Password</div>
+				<div className={'form-field-input ' + (passwordError ? 'errored' : '')}>
+					<input type='password' value={password} onChange={elem => passwordChange(elem.target.value)} />
+					<div className='form-field-error'>{passwordError && <FieldError error={passwordError} />}</div>
+				</div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-header'>Repeat password</div>
+				<div className={'form-field-input ' + (password2Error ? 'errored' : '')}>
+					<input type='password' value={password2} onChange={elem => password2Change(elem.target.value)} />
+					<div className='form-field-error'>{password2Error && <FieldError error={password2Error} />}</div>
+				</div>
+			</div>
+			<div className='form-field'>
+				<div className='form-field-input'><button type='submit'>Register</button></div>
+			</div>
+		</div>
+	</form>;
 }

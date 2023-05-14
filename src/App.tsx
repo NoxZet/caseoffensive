@@ -150,10 +150,13 @@ const App = () => {
 	// TODO: Make 'checking' loader cover whole screen (so login form doesn't flash before changing to logged in screen)
 	if (loggedUser) {
 		return <div className='app'>
+			{/* Page header bar */}
 			<div className='app-header-bar'>
-				<div className='app-header-item'><a onClick={() => setCurrentScreen('quests')} href="#">Quests</a></div>
-				<div className='app-header-item'><a onClick={() => setCurrentScreen('containers')} href="#">Containers</a></div>
-				<div className='app-header-item'><a onClick={() => setCurrentScreen('skins')} href="#">Skins</a></div>
+				{[['quests', 'Quests'], ['containers', 'Containers'], ['skins', 'Skins']].map(([screenName, displayName]) =>
+					<div className={'app-header-item' + (currentScreen === screenName ? ' is-current-page' : '')}>
+						<a onClick={() => setCurrentScreen(screenName)} href="#">{displayName}</a>
+					</div>
+				)}
 				<div className='app-header-user hover-parent'>
 					<div>{loggedUser.username}</div>
 					<div className='hover-target'>
@@ -161,7 +164,7 @@ const App = () => {
 					</div>
 				</div>
 			</div>
-			{
+			{/* Page content (based on currentScreen) */
 				currentScreen === 'containers' ?
 					<InventoryPage key='containers' axiosInstance={axiosInstance} type='container'/>
 				: currentScreen === 'skins' ?
@@ -171,11 +174,11 @@ const App = () => {
 			}
 		</div>
 	} else {
+		// Register and login forms including header
 		const isRegister = currentScreen === 'register';
-		return <div className="app">
-			<h1>
-				{isRegister ? 'Create an account' : 'Login'}
-			</h1>
+		return <div className="app login-register">
+			<h1>Case Offensive</h1>
+			<h2>{isRegister ? 'Create an account' : 'Login'}</h2>
 			{displayError()}
 			{isRegister
 				? <RegisterForm onSubmitRegister={onSubmitRegister} onError={(error) => setCurrentError(error)}/>

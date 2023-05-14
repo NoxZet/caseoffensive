@@ -1,12 +1,13 @@
 * {
 	--bg-color: #263039;
+	--main-font: Arial, Helvetica, sans-serif;
 	--max-quest-bar-width: 150px;
 }
 
 body {
 	background-color: var(--bg-color);
 	color: white;
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: var(--main-font);
 }
 
 a {
@@ -20,6 +21,55 @@ table {
 
 th, td {
 	padding: 0px;
+}
+
+.app.login-register {
+	text-align: center;
+}
+.app.login-register form {
+	margin: auto;
+	width: 20em;
+}
+.app.login-register .form-field-header {
+	text-align: left;
+	padding-left: 0.1em;
+	font-size: 0.9em;
+}
+.app.login-register .form-field {
+	margin-bottom: 0.5em;
+}
+.app.login-register input[type='text'], .app.login-register input[type='password'] {
+	box-sizing: border-box;
+	width: 100%;
+	background: rgba(255, 255, 255, 0.1);
+	color: white;
+	font-family: var(--main-font);
+	font-size: 1em;
+	padding: 0.2em;
+	border: black 1px solid;
+	border-radius: 4px;
+}
+.app.login-register input[type='text']:focus, .app.login-register input[type='password']:focus {
+	outline: none;
+	border-color: white;
+}
+.app.login-register .form-field-input.errored input[type='text']:not(:focus),
+.app.login-register .form-field-input.errored input[type='password']:not(:focus) {
+	border-color: rgb(255, 120, 150);
+}
+.app.login-register .form-field-input input[type='text']:not(:focus) ~ .form-field-error,
+.app.login-register .form-field-input input[type='password']:not(:focus) ~ .form-field-error {
+	color: rgb(255, 120, 150);
+}
+.app.login-register button {
+	width: 100%;
+	background: rgba(255, 255, 255, 0.2);
+	color: white;
+	font-family: var(--main-font);
+	font-size: 1em;
+	border: none;
+	border-radius: 8px;
+	padding: 0.3em;
 }
 
 .app-header-bar {

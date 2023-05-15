@@ -224,6 +224,15 @@ export default class DbInterface {
 		return this.getDbColumnName(column.name);
 	}
 
+	selectCount(OneClass: DbModel<BaseModel>, conditions: string = '', parameters: any[] = []): Promise<number> {
+		const query = `SELECT COUNT(*) FROM ${OneClass.tableName} ${conditions}`;
+		return new Promise((resolve, reject) => {
+			this.client.query(query, parameters).then(returned => {
+				resolve(returned.rows[0].count);
+			}).catch(error => reject(error));
+		});
+	}
+
 	selectModel<Model extends BaseModel>(OneClass: DbModel<Model>, conditions: string = '', parameters: any[] = []): Promise<(Model & BaseModelId)[]> {
 		const columns = [];
 		// Build a list of columns to select and a query string

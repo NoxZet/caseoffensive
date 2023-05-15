@@ -18,9 +18,11 @@ app.get('/inventory/container', security.getUserMiddleware, async function (req:
 		const containers = await dbInterface.selectModel(ContainerItem,
 			'WHERE owner_id = $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2',
 			[user.id, page * 20]
-		)
+		);
+		const containerCount = await dbInterface.selectCount(ContainerItem, 'WHERE owner_id = $1', [user.id]);
 		res.status(200)
 		.setHeader('next', `/inventory/container?page=${page + 1}`)
+		.setHeader('count', containerCount)
 		.json(
 			containers.map(container => container.toResource())
 		);
@@ -37,8 +39,10 @@ app.get('/inventory/skin', security.getUserMiddleware, async function (req: expr
 			'WHERE owner_id = $1 ORDER BY created_at DESC LIMIT 20 OFFSET $2',
 			[user.id, page * 20]
 		)
+		const containerCount = await dbInterface.selectCount(SkinItem, 'WHERE owner_id = $1', [user.id]);
 		res.status(200)
 		.setHeader('next', `/inventory/skin?page=${page + 1}`)
+		.setHeader('count', containerCount)
 		.json(
 			containers.map(container => container.toResource())
 		);
@@ -55,7 +59,6 @@ app.get('/inventory/container/:containerId([0-9]+)/drops', security.getUserMiddl
 			'WHERE owner_id = $1 AND id = $2',
 			[user.id, containerId]
 		);
-		//console.log(containers);
 		if (containers.length === 0) {
 			res.status(404).json({
 				'message': 'Invalid container'

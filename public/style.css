@@ -275,6 +275,15 @@ th, td {
 	height: 256px;
 }
 
+.page-bar {
+	display: flex;
+	gap: 0.5em;
+	justify-content: center;
+	margin-top: 1.2em;
+	margin-bottom: 0.5em;
+	font-size: 1.5em;
+}
+
 .opening-screen.possible-drops-screen {
 	display: flex;
 	gap: 20px;

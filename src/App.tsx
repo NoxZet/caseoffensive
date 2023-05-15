@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { Root } from "react-dom/client";
 import axios, { AxiosResponse } from "axios";
 
@@ -13,6 +14,8 @@ type Logged = false | User;
 const storageKeyToken = 'case_token';
 
 const App = () => {
+	const navigate = useNavigate();
+
 	const [loading, setLoading] = useState(true);
 	const [loggedUser, setLoggedUser] = useState<Logged>(false);
 	const [currentScreen, setCurrentScreen] = useState<string>('');
@@ -138,6 +141,7 @@ const App = () => {
 			setCurrentError(message);
 			localStorage.removeItem(storageKeyToken)
 			setLoggedUser(false);
+			navigate('/');
 		})
 		.catch(error => {
 			// TODO: handling
@@ -153,8 +157,8 @@ const App = () => {
 			{/* Page header bar */}
 			<div className='app-header-bar'>
 				{[['quests', 'Quests'], ['containers', 'Containers'], ['skins', 'Skins']].map(([screenName, displayName]) =>
-					<div className={'app-header-item' + (currentScreen === screenName ? ' is-current-page' : '')}>
-						<a onClick={() => setCurrentScreen(screenName)} href="#">{displayName}</a>
+					<div className={'app-header-item' + (currentScreen === screenName ? ' is-current-page' : '')} key={screenName}>
+						<Link to={screenName}>{displayName}</Link>
 					</div>
 				)}
 				<div className='app-header-user hover-parent'>
@@ -164,36 +168,46 @@ const App = () => {
 					</div>
 				</div>
 			</div>
-			{/* Page content (based on currentScreen) */
-				currentScreen === 'containers' ?
-					<InventoryPage key='containers' axiosInstance={axiosInstance} type='container'/>
-				: currentScreen === 'skins' ?
-					<InventoryPage key='skins' axiosInstance={axiosInstance} type='skin'/>
-				:
-					<QuestPage axiosInstance={axiosInstance}/>
-			}
+			{/* Page content (based on currentScreen) */}
+			<Routes>
+				<Route path='containers' element={<InventoryPage key='containers' axiosInstance={axiosInstance} type='container'/>}/>
+				<Route path='skins' element={<InventoryPage key='skins' axiosInstance={axiosInstance} type='skin'/>}/>
+				<Route path='*' element={<QuestPage axiosInstance={axiosInstance}/>}/>
+			</Routes>
 		</div>
 	} else {
 		// Register and login forms including header
 		const isRegister = currentScreen === 'register';
 		return <div className="app login-register">
 			<h1>Case Offensive</h1>
-			<h2>{isRegister ? 'Create an account' : 'Login'}</h2>
-			{displayError()}
-			{isRegister
-				? <RegisterForm onSubmitRegister={onSubmitRegister} onError={(error) => setCurrentError(error)}/>
-				: <LoginForm onSubmitLogin={onSubmitLogin}/>
-			}
-			{isRegister
-				? <div><a onClick={() => setCurrentScreen('login')} href='#'>Already have an account?</a></div>
-				: <div><a onClick={() => setCurrentScreen('register')} href='#'>Create a new account</a></div>}
-			{displayLoader()}
+			<Routes>
+				<Route path='register' element={
+					<>
+						<h2>Create an account</h2>
+						{displayError()}
+						<RegisterForm onSubmitRegister={onSubmitRegister} onError={(error) => setCurrentError(error)}/>
+						<div><Link to='..'>Already have an account?</Link></div>
+						{displayLoader()}
+					</>
+				}/>
+				<Route path='*' element={
+					<>
+						<h2>Login</h2>
+						{displayError()}
+						<LoginForm onSubmitLogin={onSubmitLogin}/>
+						<div><Link to='../register'>Create a new account</Link></div>
+						{displayLoader()}
+					</>
+				}/>
+			</Routes>
 		</div>
 	}
 }
 
 function renderApp(root: Root) {
-	root.render(<App/>);
+	root.render(<BrowserRouter>
+		<App/>
+	</BrowserRouter>);
 }
 
 export default renderApp;

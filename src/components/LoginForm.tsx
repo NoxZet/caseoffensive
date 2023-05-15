@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 
 export default function LoginForm({ onSubmitLogin } : {
 	onSubmitLogin: (username: string, password: string) => void,
@@ -6,7 +6,8 @@ export default function LoginForm({ onSubmitLogin } : {
 	const [username, setUsername] = useState('');
 	const [password, setPassword] = useState('');
 
-	function submit() {
+	function submit(e: FormEvent) {
+		e.preventDefault();
 		onSubmitLogin(username, password);
 	}
 

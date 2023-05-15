@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 import { USERNAME_PREDICATE, EMAIL_PREDICATE, PASSWORD_PREDICATE } from 'common/accountPredicates';
 
 function FieldError({ error } : { error: string }) {
@@ -52,7 +52,8 @@ export default function RegisterForm({ onSubmitRegister, onError } : {
 	const passwordError = displayErrorWithLength(password, PASSWORD_PREDICATE);
 	const password2Error = displayErrorWithLength([password2, password], password2Predicate);
 
-	function submit() {
+	function submit(e: FormEvent) {
+		e.preventDefault();
 		const error = EMAIL_PREDICATE(email) || USERNAME_PREDICATE(username) || PASSWORD_PREDICATE(password) || password2Predicate([password2, password]);
 		if (error) {
 			onError(error);
